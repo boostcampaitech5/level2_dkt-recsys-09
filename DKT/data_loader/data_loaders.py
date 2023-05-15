@@ -53,6 +53,6 @@ class UltraGCNDataLoader(DataLoader):
         super().__init__(sampler=self.dataset.train_sampler, **self.init_kwargs)
 
     
-    def get_valid_set(self):
+    def split_validation(self):
         
         return DataLoader(sampler=self.dataset.valid_sampler, **self.init_kwargs)
