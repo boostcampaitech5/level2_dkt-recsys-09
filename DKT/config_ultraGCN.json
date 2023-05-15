@@ -3,16 +3,15 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "DKTModel",
+        "type": "UltraGCN",
         "args": {}
     },
     "data_loader": {
-        "type": "DKTDataLoader",
+        "type": "UltraGCNDataLoader",
         "args":{
-            "data_dir": "data/",
+            "data_dir": "~/input/data",
             "batch_size": 128,
-            "shuffle": true,
-            "validation_split": 0.1,
+            "shuffle": false,
             "num_workers": 2
         }
     },
