@@ -19,8 +19,8 @@ def train_model(args, train, test, FEATS):
     test = test.drop(['answerCode'], axis=1)
 
     # scaling some features
-    train = scaling(args, train, is_train=True)
-    test = scaling(args, test, is_train=False)
+    #train = scaling(args, train, is_train=True)
+    #test = scaling(args, test, is_train=False)
 
     # get a model and train
     model = get_lgbm_model(args, train, y_train, test, y_test, FEATS)

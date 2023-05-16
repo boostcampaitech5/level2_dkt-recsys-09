@@ -1,7 +1,8 @@
 import argparse
 
 
-def parse_args(mode="train"):
+#def parse_args_train(mode="train"):
+def parse_args_train():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--seed", default=42, type=int, help="seed")
@@ -32,14 +33,16 @@ def parse_args(mode="train"):
 
     return args
 
-def parse_args(mode="test"):
+
+#def parse_args_test(mode="test"):
+def parse_args_test():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--seed", default=42, type=int, help="seed")
 
     parser.add_argument("--device", default="cpu", type=str, help="cpu or gpu")
 
-    parser.add_argument("--data_dir", default="/opt/ml/input/data/", type=str, help="data directory",)
+    parser.add_argument("--data_dir", default="data/", type=str, help="data directory",)
 
     parser.add_argument("--asset_dir", default="asset/", type=str, help="assest directory",)
 

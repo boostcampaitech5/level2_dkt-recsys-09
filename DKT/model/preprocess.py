@@ -9,9 +9,11 @@ from datetime import datetime
 import joblib
 from pickle import dump
 from pickle import load
+import math
 
 def load_data(args):
-    csv_file_path = os.path.join(args.data_dir, 'train_data.csv') 
+    #data_dir = '/opt/ml/input/data' # 경로는 상황에 맞춰서 수정해주세요!
+    csv_file_path = os.path.join(args.data_dir, 'train_data.csv') # 데이터는 대회홈페이지에서 받아주세요 :)
     df = pd.read_csv(csv_file_path) 
     return df
 
@@ -32,6 +34,68 @@ def feature_engineering(df):
 
     df = pd.merge(df, correct_t, on=['testId'], how="left")
     df = pd.merge(df, correct_k, on=['KnowledgeTag'], how="left")
+
+
+    df['hour'] = pd.to_datetime(df['Timestamp']).dt.hour
+    df['dow'] = pd.to_datetime(df['Timestamp']).dt.dayofweek # 요일을 숫자로
+
+    df['testcode']=df['testId'].apply(lambda x : int(x[1:4])//10)
+    df['problem_number'] = df['assessmentItemID'].apply(lambda x: int(x[7:])) 
+
+    # feature 별 정답여부
+    correct_t = df.groupby(['testId'])['answerCode'].agg(['mean', 'sum'])
+    correct_t.columns = ["test_mean", 'test_sum']
+    correct_k = df.groupby(['KnowledgeTag'])['answerCode'].agg(['mean', 'sum'])
+    correct_k.columns = ["tag_mean", 'tag_sum']
+    correct_a = df.groupby(['assessmentItemID'])['answerCode'].agg(['mean', 'sum'])
+    correct_a.columns = ["ass_mean", 'ass_sum']
+    correct_p = df.groupby(['problem_number'])['answerCode'].agg(['mean', 'sum'])
+    correct_p.columns = ["prb_mean", 'prb_sum']
+    correct_h = df.groupby(['hour'])['answerCode'].agg(['mean', 'sum'])
+    correct_h.columns = ["hour_mean", 'hour_sum']
+    correct_d = df.groupby(['dow'])['answerCode'].agg(['mean', 'sum'])
+    correct_d.columns = ["dow_mean", 'dow_sum'] 
+
+    df = pd.merge(df, correct_t, on=['testId'], how="left")
+    df = pd.merge(df, correct_k, on=['KnowledgeTag'], how="left")
+    df = pd.merge(df, correct_a, on=['assessmentItemID'], how="left")
+    df = pd.merge(df, correct_p, on=['problem_number'], how="left")
+    df = pd.merge(df, correct_h, on=['hour'], how="left")
+    df = pd.merge(df, correct_d, on=['dow'], how="left")
+
+
+    f = lambda x : len(set(x))
+    t_df = df.groupby(['testId']).agg({
+    'problem_number':'max',
+    'KnowledgeTag':f
+    })
+    t_df.reset_index(inplace=True)
+
+    t_df.columns = ['testId','problem_count',"tag_count"]
+
+    df = pd.merge(df,t_df,on='testId',how='left')
+
+    gdf = df[['userID','testId','problem_number','testcode','Timestamp']].sort_values(by=['userID','testcode','Timestamp'])
+    gdf['buserID'] = gdf['userID'] != gdf['userID'].shift(1)
+    gdf['btestcode'] = gdf['testcode'] != gdf['testcode'].shift(1)
+    gdf['first'] = gdf[['buserID','btestcode']].any(axis=1).apply(lambda x : 1- int(x))
+    gdf['RepeatedTime'] = pd.to_datetime(gdf['Timestamp']).diff().fillna(pd.Timedelta(seconds=0)) 
+    gdf['RepeatedTime'] = gdf['RepeatedTime'].apply(lambda x: x.total_seconds()) * gdf['first']
+    df['RepeatedTime'] = gdf['RepeatedTime'].apply(lambda x : math.log(x+1))
+
+    df['prior_KnowledgeTag_frequency'] = df.groupby(['userID','KnowledgeTag']).cumcount()
+
+    df['problem_position'] = df['problem_number'] / df["problem_count"]
+    df['solve_order'] = df.groupby(['userID','testId']).cumcount()
+    df['solve_order'] = df['solve_order'] - df['problem_count']*(df['solve_order'] > df['problem_count']).apply(int) + 1
+    df['retest'] = (df['solve_order'] > df['problem_count']).apply(int)
+    T = df['solve_order'] != df['problem_number']
+    TT = T.shift(1)
+    TT[0] = False
+    df['solved_disorder'] = (TT.apply(lambda x : not x) & T).apply(int)
+
+    df['testId'] = df['testId'].apply(lambda x : int(x[1:4]+x[-3]))
+
     
     return df
 
