@@ -12,7 +12,7 @@ from pickle import load
 import math
 
 def load_data(args):
-    csv_file_path = os.path.join(args.data_dir, 'train_data.csv')
+    csv_file_path = os.path.join(args.data_dir, args.df_name)
     df = pd.read_csv(csv_file_path) 
     return df
 

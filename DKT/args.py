@@ -1,7 +1,6 @@
 import argparse
 
 
-#def parse_args_train(mode="train"):
 def parse_args_train():
     parser = argparse.ArgumentParser()
 
@@ -29,12 +28,13 @@ def parse_args_train():
 
     parser.add_argument("--model_dir", default="model/", type=str, help="model directory")
 
+    parser.add_argument("--df_name", default="train_data.csv", type=str, help="train_df name")
+
     args = parser.parse_args()
 
     return args
 
 
-#def parse_args_test(mode="test"):
 def parse_args_test():
     parser = argparse.ArgumentParser()
 
@@ -46,9 +46,11 @@ def parse_args_test():
 
     parser.add_argument("--asset_dir", default="asset/", type=str, help="assest directory",)
 
-    parser.add_argument("--output_dir", default="output/", type=str, help="output directory")
+    #parser.add_argument("--output_dir", default="output/", type=str, help="output directory")
 
     parser.add_argument("--model_dir", default="model/", type=str, help="model directory")
+
+    parser.add_argument("--df_name", default="test_data.csv", type=str, help="test_df name")
 
     args = parser.parse_args()
 

@@ -6,9 +6,8 @@ import lightgbm as lgb
 from matplotlib import pyplot as plt
 
 from args import parse_args_train
-from model.preprocess import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding
-from model.preprocess import convert_time
-from trainer.trainer import train_model
+from model.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time
+from trainer.trainer_ML import train_model
 
 
 if __name__ == "__main__":
@@ -48,3 +47,5 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(args.pic_dir, 'lgbm_feature_importance.png'))
     
     print('*'*20 + "Finish!!" + '*'*20)
+
+
