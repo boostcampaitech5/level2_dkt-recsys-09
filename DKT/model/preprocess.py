@@ -12,13 +12,31 @@ from pickle import load
 import math
 
 def load_data(args):
-    #data_dir = '/opt/ml/input/data' # 경로는 상황에 맞춰서 수정해주세요!
-    csv_file_path = os.path.join(args.data_dir, 'train_data.csv') # 데이터는 대회홈페이지에서 받아주세요 :)
+    csv_file_path = os.path.join(args.data_dir, 'train_data.csv')
     df = pd.read_csv(csv_file_path) 
     return df
 
 
 def feature_engineering(df):
+    df = df.sort_values(['userID', 'Timestamp'])
+
+    # diff
+    df['diff'] = df.sort_values(['userID','Timestamp']).groupby('userID')['Timestamp'].diff()
+
+    diff_df = df['diff']
+    diff_df.dropna(inplace=True)
+
+    # nan은 -1
+    # 600(10분) 이상이면 다 600
+    df['diff'].fillna(-1, inplace=True)
+    idx = df[df['diff'] >= 600].index
+    df.loc[idx, 'diff'] = 600
+
+    tmp = df[df['diff'] >= 0]
+    correct_k = tmp.groupby(['KnowledgeTag'])['diff'].agg(['mean'])
+    df = pd.merge(df, correct_k, on=['KnowledgeTag'], how="left")
+    
+    
     df.sort_values(by=['userID','Timestamp'], inplace=True)
     
     #유저들의 문제 풀이수, 정답 수, 정답률
@@ -96,6 +114,43 @@ def feature_engineering(df):
 
     df['testId'] = df['testId'].apply(lambda x : int(x[1:4]+x[-3]))
 
+    # 정답과 오답 기준으로 나눠서 생각
+    o_df = df[df['answerCode']==1]
+    x_df = df[df['answerCode']==0]
+
+    diff_k = df.groupby(['KnowledgeTag'])['diff'].agg('mean').reset_index()
+    diff_k.columns = ['KnowledgeTag',"tag_diff"]
+    diff_k_o = o_df.groupby(['KnowledgeTag'])['diff'].agg('mean').reset_index()
+    diff_k_o.columns = ['KnowledgeTag', "tag_diff_o"]
+    diff_k_x = x_df.groupby(['KnowledgeTag'])['diff'].agg('mean').reset_index()
+    diff_k_x.columns = ['KnowledgeTag', "tag_diff_x"]
+
+    df = pd.merge(df, diff_k, on=['KnowledgeTag'], how="left")
+    df = pd.merge(df, diff_k_o, on=['KnowledgeTag'], how="left")
+    df = pd.merge(df, diff_k_x, on=['KnowledgeTag'], how="left")
+
+    ass_k = df.groupby(['assessmentItemID'])['diff'].agg('mean').reset_index()
+    ass_k.columns = ['assessmentItemID',"ass_diff"]
+    ass_k_o = o_df.groupby(['assessmentItemID'])['diff'].agg('mean').reset_index()
+    ass_k_o.columns = ['assessmentItemID',"ass_diff_o"]
+    ass_k_x = x_df.groupby(['assessmentItemID'])['diff'].agg('mean').reset_index()
+    ass_k_x.columns = ['assessmentItemID',"ass_diff_x"]
+
+    df = pd.merge(df, ass_k, on=['assessmentItemID'], how="left")
+    df = pd.merge(df, ass_k_o, on=['assessmentItemID'], how="left")
+    df = pd.merge(df, ass_k_x, on=['assessmentItemID'], how="left")
+
+    prb_k = df.groupby(['problem_number'])['diff'].agg('mean').reset_index()
+    prb_k.columns = ['problem_number',"prb_diff"]
+    prb_k_o = o_df.groupby(['problem_number'])['diff'].agg('mean').reset_index()
+    prb_k_o.columns = ['problem_number',"prb_diff_o"]
+    prb_k_x = x_df.groupby(['problem_number'])['diff'].agg('mean').reset_index()
+    prb_k_x.columns = ['problem_number',"prb_diff_x"]
+
+    df = pd.merge(df, prb_k, on=['problem_number'], how="left")
+    df = pd.merge(df, prb_k_o, on=['problem_number'], how="left")
+    df = pd.merge(df, prb_k_x, on=['problem_number'], how="left")
+
     
     return df
 
@@ -129,27 +184,6 @@ def categorical_label_encoding(args, df, is_train=True):
 def convert_time(s):
      timestamp = time.mktime(datetime.strptime(s, "%Y-%m-%d %H:%M:%S").timetuple())
      return int(timestamp)
-
-
-def add_diff_feature(df):
-    df = df.sort_values(['userID', 'Timestamp'])
-
-    # diff
-    df['diff'] = df.sort_values(['userID','Timestamp']).groupby('userID')['Timestamp'].diff()
-
-    diff_df = df['diff']
-    diff_df.dropna(inplace=True)
-
-    # nan은 -1
-    # 600(10분) 이상이면 다 600
-    df['diff'].fillna(-1, inplace=True)
-    idx = df[df['diff'] >= 600].index
-    df.loc[idx, 'diff'] = 600
-
-    tmp = df[df['diff'] >= 0]
-    correct_k = tmp.groupby(['KnowledgeTag'])['diff'].agg(['mean'])
-    df = pd.merge(df, correct_k, on=['KnowledgeTag'], how="left")
-    return df
 
 
 def scaling(args, df, is_train=True):
@@ -189,9 +223,6 @@ def custom_train_test_split(args, df, split=True):
 
     train = df[df['userID'].isin(user_ids)]
     test = df[df['userID'].isin(user_ids) == False]
-
-    #test데이터셋은 각 유저의 마지막 interaction만 추출
-    #test = test[test['userID'] != test['userID'].shift(-1)]
     
     # 결측치 채우기
     train.fillna(0, inplace=True)
