@@ -114,3 +114,5 @@ __MACOSX/
 
 # wandb
 wandb/
+
+asset/

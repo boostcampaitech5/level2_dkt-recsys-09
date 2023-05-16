@@ -6,7 +6,8 @@ import lightgbm as lgb
 from matplotlib import pyplot as plt
 
 from args import parse_args
-from model.preprocess import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time, add_diff_feature
+from model.preprocess import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding
+#convert_time, add_diff_feature
 from trainer.trainer import train_model
 
 
@@ -15,28 +16,27 @@ if __name__ == "__main__":
     args = parse_args(mode="train")
     args.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # 사용할 Feature 설정
-    FEATS = ['KnowledgeTag', 'user_correct_answer', 'user_acc', 'test_mean',
-     'test_sum','tag_mean', 'assessmentItemID', 'Timestamp', 'diff', 'mean']
-
+    
     # Preprocessing
     print("Preparing data ...")
     df = load_data(args)
     df = feature_engineering(df)
     df = categorical_label_encoding(args, df, is_train=True)
-    df["Timestamp"] = df["Timestamp"].apply(convert_time)
-    df = add_diff_feature(df)
+    #df["Timestamp"] = df["Timestamp"].apply(convert_time)
+    #df = add_diff_feature(df)
 
     train, test = custom_train_test_split(args, df)
     print("Done Preprocessing!!")
 
     wandb.init(project="dkt", config=vars(args))
 
-
-    # Train a selected model
+    
+    # Train model
     print("Start Training ...")
+    FEATS = [col for col in df.select_dtypes(include=["int", "int8", "int16", "int64", "float", "float16", "float64"]).columns if col not in ['answerCode']]
     trained_model = train_model(args, train, test, FEATS)
     print("Done training!!")
+
 
     # Save a feature importance
     x = lgb.plot_importance(trained_model)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         os.makedirs(args.pic_dir)
     plt.savefig(os.path.join(args.pic_dir, 'lgbm_feature_importance.png'))
     
-    print("Done!")
+    print("Done!!")
 
 
 

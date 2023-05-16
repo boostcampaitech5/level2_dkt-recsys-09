@@ -12,7 +12,7 @@ def parse_args(mode="train"):
 
     parser.add_argument("--asset_dir", default="asset/", type=str, help="assest directory",)
 
-    parser.add_argument("--split_ratio", default=0.7, type=float, help="train ratio")
+    parser.add_argument("--split_ratio", default=0.7, type=float, help="train ratio (default: 0.7)")
 
     parser.add_argument("--verbos_eval", default=100, type=int, help="model verbos_eval")
 
