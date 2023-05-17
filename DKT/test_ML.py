@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from model.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time, scaling
+from data_loader.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time, scaling
 import lightgbm as lgb
 import joblib
 from args import parse_args_test

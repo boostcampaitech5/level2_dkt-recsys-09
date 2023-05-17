@@ -3,7 +3,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.metrics import accuracy_score
 import numpy as np
 from wandb.lightgbm import wandb_callback
-from model.preprocess_ML import scaling
+from data_loader.preprocess_ML import scaling
 import wandb
 from model.model import get_lgbm_model, get_lgbm_optuna
 import os

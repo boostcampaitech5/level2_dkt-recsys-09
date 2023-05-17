@@ -5,7 +5,7 @@ import lightgbm as lgb
 from matplotlib import pyplot as plt
 
 from args import parse_args_train
-from model.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time
+from data_loader.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time
 from trainer.trainer_ML import train_model
 
 
