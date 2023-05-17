@@ -29,7 +29,7 @@ if __name__ == "__main__":
     print('*'*20 + "Done Preprocessing" + '*'*20)
 
     # Make new_wandb project
-    wandb.init(project="dkt", config=vars(args))
+    wandb.init(project="dkt_lgbm", config=vars(args))
 
     
     # Train model
