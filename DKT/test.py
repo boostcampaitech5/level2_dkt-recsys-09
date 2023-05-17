@@ -28,26 +28,23 @@ if __name__ == "__main__":
     # Leave Last Interaction Only 
     test_df = test_df[test_df['userID'] != test_df['userID'].shift(-1)]
     test_df.fillna(0, axis=1, inplace=True)
-
-
     # Drop Target Feature
     test_df = test_df.drop(['answerCode'], axis=1)
 
 
     # Prediction
-    print('*'*20 + "Start Predict ..." + '*'*20)
+    print('*'*20 + "Start Predict ..." + '*'*21)
     FEATS = [col for col in test_df.select_dtypes(include=["int", "int8", "int16", "int64", "float", "float16", "float64"]).columns if col not in ['answerCode']]
-    #model = lgb.Booster(model_file=os.path.join(args.model_dir, "lgbm_model.txt")) # Load saved model
     model = joblib.load(args.model_dir + 'lgbm_optuna_model.pkl')
     total_preds = model.predict(test_df[FEATS])
-    print('*'*20 + "Done Predict" + '*'*25)
+    print('*'*20 + "Done Predict" + '*'*26)
 
     # Save Output
     write_path = os.path.join(args.data_dir, "lgbm_optuna_submission.csv")
     submission = pd.read_csv(args.data_dir + 'sample_submission.csv')
     submission['prediction'] = total_preds
     submission.to_csv(write_path)
-    print('*'*20 + "Finish!!" + '*'*20)
+    print('*'*25 + "Finish!!" + '*'*25)
 
 
 

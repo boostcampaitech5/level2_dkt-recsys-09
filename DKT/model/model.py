@@ -1,9 +1,13 @@
 import wandb
 from wandb.lightgbm import wandb_callback
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import accuracy_score
 import wandb
 import lightgbm as lgb
 import numpy as np
 import os
+import optuna
+from optuna.samplers import TPESampler
 
 def get_lgbm_model(args, train, y_train, test, y_test, FEATS):
     
@@ -26,6 +30,54 @@ def get_lgbm_model(args, train, y_train, test, y_test, FEATS):
     model.save_model(model_path)
 
     return model
+
+def get_lgbm_optuna(args, train, y_train, test, y_test, FEATS):
+    sampler = TPESampler(args.seed)
+    def objective(trial):
+        dtrain = lgb.Dataset(train[FEATS], y_train)
+        dtest = lgb.Dataset(test[FEATS], y_test)
+
+        param = {
+            'objective': 'binary',
+            'metric': 'binary_logloss',
+            'boosting_type': 'gbdt',
+            'num_leaves': trial.suggest_int('num_leaves', 10, 1000),
+            'learning_rate': trial.suggest_loguniform('learning_rate', 0.01, 0.1),
+            'feature_fraction': trial.suggest_uniform('feature_fraction', 0.1, 1.0),
+            'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.1, 1.0),
+            'bagging_freq': trial.suggest_int('bagging_freq', 1, 10),
+            'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+            'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+            'seed': 42
+        }
+        model = lgb.train(
+            param, 
+            dtrain,
+            valid_sets=[dtrain, dtest],
+            verbose_eval=100,
+            num_boost_round=500,
+            early_stopping_rounds=100,
+        )
+
+        preds = model.predict(test[FEATS])
+        acc = accuracy_score(y_test, np.where(preds >= 0.5, 1, 0))
+        auc = roc_auc_score(y_test, preds)
+
+        wandb.log({"ACC": acc, "AUC": auc})
+
+        return auc
+
+    study = optuna.create_study(direction='maximize', sampler=TPESampler())
+    study.optimize(objective,  n_trials=100)
+
+    trial = study.best_trial
+    trial_params = trial.params
+    print('Best Trial: score {},\nparams {}'.format(trial.value, trial_params))
+
+    # 최적의 파라미터로 모델 재학습
+    final_lgb_model = lgb.LGBMClassifier(**trial_params)
+    final_lgb_model.fit(train[FEATS], y_train)
+    return final_lgb_model
 
 
 

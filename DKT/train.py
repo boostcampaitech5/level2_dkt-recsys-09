@@ -45,6 +45,6 @@ if __name__ == "__main__":
         os.makedirs(args.pic_dir)
     plt.savefig(os.path.join(args.pic_dir, 'lgbm_feature_importance.png'))
     
-    print('*'*20 + "Finish!!" + '*'*20)
+    print('*'*25 + "Finish!!" + '*'*25)
 
 
