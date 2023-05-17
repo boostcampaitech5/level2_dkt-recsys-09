@@ -1,18 +1,25 @@
 {
-    "name": "ultraGCN",
+    "name": "UltraGCN",
     "n_gpu": 1,
 
     "arch": {
         "type": "UltraGCN",
-        "args": {}
+        "args": {
+            "user_num": 7442,
+            "item_num": 9454,
+            "embedding_dim": 64,
+            "gamma": 1e-4,
+            "lambda": 0.8
+        }
     },
     "data_loader": {
         "type": "UltraGCNDataLoader",
         "args":{
             "data_dir": "~/input/data",
-            "batch_size": 128,
-            "shuffle": false,
-            "num_workers": 2
+            "batch_size": 512,
+            "shuffle": true,
+            "num_workers": 2,
+            "validation_split": 0.2
         }
     },
     "optimizer": {
@@ -23,9 +30,9 @@
             "amsgrad": true
         }
     },
-    "loss": "nll_loss",
+    "loss": "UltraGCN_loss",
     "metrics": [
-        "accuracy", "top_k_acc"
+        "accuracy"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -44,6 +51,6 @@
         "monitor": "min val_loss",
         "early_stop": 10,
 
-        "tensorboard": true
+        "tensorboard": false
     }
 }
