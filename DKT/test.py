@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from model.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time, scaling
 import lightgbm as lgb
+import joblib
 from args import parse_args_test
 import warnings
 warnings.filterwarnings(action='ignore')
@@ -36,21 +37,18 @@ if __name__ == "__main__":
     # Prediction
     print('*'*20 + "Start Predict ..." + '*'*20)
     FEATS = [col for col in test_df.select_dtypes(include=["int", "int8", "int16", "int64", "float", "float16", "float64"]).columns if col not in ['answerCode']]
-    model = lgb.Booster(model_file=os.path.join(args.model_dir, "lgbm_model.txt")) # Load saved model
+    #model = lgb.Booster(model_file=os.path.join(args.model_dir, "lgbm_model.txt")) # Load saved model
+    model = joblib.load(args.model_dir + 'lgbm_optuna_model.pkl')
     total_preds = model.predict(test_df[FEATS])
     print('*'*20 + "Done Predict" + '*'*25)
 
     # Save Output
-    write_path = os.path.join(args.data_dir, "lgbm_submission.csv")
+    write_path = os.path.join(args.data_dir, "lgbm_optuna_submission.csv")
     submission = pd.read_csv(args.data_dir + 'sample_submission.csv')
     submission['prediction'] = total_preds
     submission.to_csv(write_path)
-    """with open(write_path, 'w', encoding='utf8') as w:
-        print("writing prediction : {}".format(write_path))
-        w.write("id,prediction\n")
-        for id, p in enumerate(total_preds):
-            w.write('{},{}\n'.format(id,p))
-"""
+    print('*'*20 + "Finish!!" + '*'*20)
+
 
 
 
