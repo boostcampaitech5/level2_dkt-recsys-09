@@ -22,37 +22,27 @@ class MnistDataLoader(BaseDataLoader):
 
 class UltraGCNDataset(Dataset):
     def __init__(self, data_dir):
-        self.train = pd.read_csv(os.path.join(data_dir, "train_data.csv"))
-        self.test = pd.read_csv(os.path.join(data_dir, "test_data.csv"))
         
-        self.data, self.train_sampler, self.valid_sampler = ultragcn_preprocess(self.train, self.test)
+        if not os.path.exists(os.path.join(data_dir, "data.csv")):
+            self.train = pd.read_csv(os.path.join(data_dir, "train_data.csv"))
+            self.test = pd.read_csv(os.path.join(data_dir, "test_data.csv"))
+            ultragcn_preprocess(self.train, self.test)
+
+        self.data = pd.read_csv(os.path.join(data_dir, "data.csv"))
         self.X = self.data.drop('answerCode', axis=1)
         self.y = self.data.answerCode
         
     def __getitem__(self, index):
-        
         return self.X.loc[index].values, self.y.loc[index]
     
     def __len__(self):
         return len(self.data)      
 
 
-class UltraGCNDataLoader(DataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=False, num_workers=1):
+class UltraGCNDataLoader(BaseDataLoader):
+    def __init__(self, data_dir, batch_size, shuffle=False, num_workers=1, validation_split=0.0):
         
         self.data_dir = data_dir
         self.dataset = UltraGCNDataset(data_dir)
         
-        self.init_kwargs = {
-            'dataset': self.dataset,
-            'batch_size': batch_size,
-            'shuffle': shuffle,
-            'num_workers': num_workers
-        }
-        
-        super().__init__(sampler=self.dataset.train_sampler, **self.init_kwargs)
-
-    
-    def split_validation(self):
-        
-        return DataLoader(sampler=self.dataset.valid_sampler, **self.init_kwargs)
+        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
