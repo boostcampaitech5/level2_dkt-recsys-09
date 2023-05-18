@@ -32,7 +32,8 @@
     },
     "loss": "UltraGCN_loss",
     "metrics": [
-        "accuracy"
+        "accuracy",
+        "auc"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -42,7 +43,7 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 4,
 
         "save_dir": "saved/",
         "save_period": 1,
