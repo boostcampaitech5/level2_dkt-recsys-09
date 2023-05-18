@@ -110,3 +110,14 @@ datasets/
 .vscode/
 .idea/
 __MACOSX/
+
+
+# wandb
+wandb/
+
+asset/
+
+# model
+save_pic/
+*.txt
+*.png
