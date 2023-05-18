@@ -53,5 +53,12 @@
         "early_stop": 10,
 
         "tensorboard": false
+    },
+    "test": {
+        "data_dir": "~/input/data/test_data_modify.csv",
+        "model_dir": "./saved/models/UltraGCN/0518_033541/model_best.pth",
+        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_submission.csv",
+        "sample_submission_dir": "~/input/data/sample_submission.csv",
+        "batch_size": 512
     }
 }
