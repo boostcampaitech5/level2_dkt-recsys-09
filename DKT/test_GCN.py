@@ -1,6 +1,6 @@
 import argparse
 import torch
-import model.model as module_arch
+import model.model_GCN as module_arch
 from parse_config import ConfigParser
 import pandas as pd
 from torch.utils.data import DataLoader, TensorDataset

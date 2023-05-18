@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader, Dataset
 from base import BaseDataLoader
 import pandas as pd
 import os
-from .data_preprocess import ultragcn_preprocess
+from .data_preprocess_GCN import ultragcn_preprocess
 
 
 class MnistDataLoader(BaseDataLoader):

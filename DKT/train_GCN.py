@@ -2,10 +2,10 @@ import argparse
 import collections
 import torch
 import numpy as np
-import data_loader.data_loaders as module_data
-import model.loss as module_loss
-import model.metric as module_metric
-import model.model as module_arch
+import data_loader.data_loaders_GCN as module_data
+import model.loss_GCN as module_loss
+import model.metric_GCN as module_metric
+import model.model_GCN as module_arch
 from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
