@@ -1,0 +1,64 @@
+{
+    "name": "UltraGCN",
+    "n_gpu": 1,
+
+    "arch": {
+        "type": "UltraGCN",
+        "args": {
+            "user_num": 7442,
+            "item_num": 9454,
+            "embedding_dim": 64,
+            "gamma": 1e-4,
+            "lambda": 0.8
+        }
+    },
+    "data_loader": {
+        "type": "UltraGCNDataLoader",
+        "args":{
+            "data_dir": "~/input/data",
+            "batch_size": 512,
+            "shuffle": true,
+            "num_workers": 2,
+            "validation_split": 0.2
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.001,
+            "weight_decay": 0,
+            "amsgrad": true
+        }
+    },
+    "loss": "UltraGCN_loss",
+    "metrics": [
+        "accuracy",
+        "auc"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 50,
+            "gamma": 0.1
+        }
+    },
+    "trainer": {
+        "epochs": 4,
+
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 2,
+        
+        "monitor": "min val_loss",
+        "early_stop": 10,
+
+        "tensorboard": false
+    },
+    "test": {
+        "data_dir": "~/input/data/test_data_modify.csv",
+        "model_dir": "./saved/models/UltraGCN/0518_033541/model_best.pth",
+        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_submission.csv",
+        "sample_submission_dir": "~/input/data/sample_submission.csv",
+        "batch_size": 512
+    }
+}
