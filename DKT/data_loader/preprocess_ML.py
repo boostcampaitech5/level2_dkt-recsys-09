@@ -11,13 +11,13 @@ from pickle import dump
 from pickle import load
 import math
 
-def load_data(args):
-    csv_file_path = os.path.join(args.data_dir, args.df_name)
+def load_data(config, path):
+    csv_file_path = os.path.join(config['data_loader']['data_dir'], path)
     df = pd.read_csv(csv_file_path) 
     return df
 
 
-def feature_engineering(df):
+def feature_engineering(data_path, df):
     df = df.sort_values(['userID', 'Timestamp'])
 
     # diff
@@ -151,15 +151,15 @@ def feature_engineering(df):
     df = pd.merge(df, prb_k_o, on=['problem_number'], how="left")
     df = pd.merge(df, prb_k_x, on=['problem_number'], how="left")
 
-    
+    df.to_csv(data_path, index=False)
     return df
 
 
-def categorical_label_encoding(args, df, is_train=True):
+def categorical_label_encoding(config, df, is_train=True):
     cate_cols = ["assessmentItemID", "testId", "KnowledgeTag"]
 
-    if not os.path.exists(args.asset_dir):
-        os.makedirs(args.asset_dir)    
+    if not os.path.exists(config['data_loader']['asset_dir']):
+        os.makedirs(config['data_loader']['asset_dir'])    
 
     for col in cate_cols:
         le = LabelEncoder()
@@ -167,10 +167,10 @@ def categorical_label_encoding(args, df, is_train=True):
             # For UNKNOWN class
             a = df[col].unique().tolist() + ["unknown"]
             le.fit(a)
-            le_path = os.path.join(args.asset_dir, col + "_classes.npy")            
+            le_path = os.path.join(config['data_loader']['asset_dir'], col + "_classes.npy")            
             np.save(le_path, le.classes_)
         else:
-            label_path = os.path.join(args.asset_dir, col + "_classes.npy")
+            label_path = os.path.join(config['data_loader']['asset_dir'], col + "_classes.npy")
             le.classes_ = np.load(label_path)
             df[col] = df[col].apply(lambda x: x if str(x) in le.classes_ else "unknown")
 
@@ -186,17 +186,17 @@ def convert_time(s):
      return int(timestamp)
 
 
-def scaling(args, df, is_train=True):
+def scaling(config, df, is_train=True):
     columns = ['user_total_answer', 'user_correct_answer', 'Timestamp', 'test_sum', 'tag_sum']
     
     for col in columns:
         if is_train:
             scaler = MinMaxScaler()
             scaler.fit(df[col].values.reshape(-1, 1))
-            sc_path = os.path.join(args.asset_dir, col + "_scaler.pkl")
+            sc_path = os.path.join(config['data_loader']['asset_dir'], col + "_scaler.pkl")
             dump(scaler, open(sc_path, 'wb'))
         else:
-            sc_path = os.path.join(args.asset_dir, col + "_scaler.pkl")
+            sc_path = os.path.join(config['data_loader']['asset_dir'], col + "_scaler.pkl")
             scaler = load(open(sc_path, 'rb'))
         
         df[col] = scaler.transform(df[col].values.reshape(-1, 1))
@@ -205,12 +205,12 @@ def scaling(args, df, is_train=True):
 
 
 # train과 test 데이터셋은 사용자 별로 묶어서 분리를 해주어야함
-def custom_train_test_split(args, df, split=True):
-    random.seed(args.seed)
+def custom_train_test_split(config, df, split=True):
+    random.seed(config['seed'])
     users = list(zip(df['userID'].value_counts().index, df['userID'].value_counts()))
     random.shuffle(users)
     
-    max_train_data_len = args.split_ratio*len(df)
+    max_train_data_len = config['data_loader']['split_ratio']*len(df)
     sum_of_train_data = 0
     user_ids =[]
 

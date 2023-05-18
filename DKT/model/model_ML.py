@@ -9,7 +9,7 @@ import os
 import optuna
 from optuna.samplers import TPESampler
 
-def get_lgbm_model(args, train, y_train, test, y_test, FEATS):
+def get_lgbm_model(config, train, y_train, test, y_test, FEATS):
     
     lgb_train = lgb.Dataset(train[FEATS], y_train)
     lgb_test = lgb.Dataset(test[FEATS], y_test)
@@ -18,21 +18,21 @@ def get_lgbm_model(args, train, y_train, test, y_test, FEATS):
             {'objective': 'binary'}, 
             lgb_train,
             valid_sets=[lgb_train, lgb_test],
-            verbose_eval=args.verbos_eval,
-            num_boost_round=args.num_boost_round,
-            early_stopping_rounds=args.early_stopping_rounds,
+            verbose_eval=config['trainer']['verbos_eval'],
+            num_boost_round=config['trainer']['num_boost_round'],
+            early_stopping_rounds=config['trainer']['early_stopping_rounds'],
             callbacks=[wandb_callback()]
         )
 
-    if not os.path.exists(args.model_dir):
-        os.makedirs(args.model_dir)
-    model_path = os.path.join(args.model_dir, "lgbm_model.txt")
+    if not os.path.exists(config['trainer']['model_dir']):
+        os.makedirs(config['trainer']['model_dir'])
+    model_path = os.path.join(config['trainer']['model_dir'], "lgbm_model.txt")
     model.save_model(model_path)
 
     return model
 
-def get_lgbm_optuna(args, train, y_train, test, y_test, FEATS):
-    sampler = TPESampler(args.seed)
+def get_lgbm_optuna(config, train, y_train, test, y_test, FEATS):
+    sampler = TPESampler(config['seed'])
     def objective(trial):
         dtrain = lgb.Dataset(train[FEATS], y_train)
         dtest = lgb.Dataset(test[FEATS], y_test)

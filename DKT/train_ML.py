@@ -16,25 +16,31 @@ def main(config):
 
     # Data Load
     print('*'*20 + "Preparing data ..." + '*'*20)
-    df = load_data(args)
+    df = load_data(config, config['data_loader']['df_train'])
 
     # Preprocessing
     print('*'*17 + "Start Preprocessing ..." + '*'*18)
     df["Timestamp"] = df["Timestamp"].apply(convert_time)
-    df = feature_engineering(df)
-    df = categorical_label_encoding(args, df, is_train=True) # LGBM을 위한 FE
+    if config['data_loader']['feature_engineering']:
+        df = feature_engineering(os.path.join(config['data_loader']['data_dir'], config['data_loader']['fe_train']), df)
+        print('*'*20 + "Done feature engineering" + '*'*20)
+    else:
+        df = load_data(config, config['data_loader']['fe_train'])
+        print('*'*20 + "LOAD feature engineering data" + '*'*20)
+
+    df = categorical_label_encoding(config, df, is_train=True) # LGBM을 위한 FE
     
-    train, test = custom_train_test_split(args, df)
+    train, test = custom_train_test_split(config, df)
     print('*'*20 + "Done Preprocessing" + '*'*20)
 
     # Make new_wandb project
-    wandb.init(project="dkt_lgbm", config=vars(args))
+    wandb.init(project="dkt_lgbm", config=vars(config))
 
     
     # Train model
     print('*'*20 + "Start Training ..." + '*'*20)
     FEATS = [col for col in df.select_dtypes(include=["int", "int8", "int16", "int64", "float", "float16", "float64"]).columns if col not in ['answerCode']]
-    trained_model = train_model(args, train, test, FEATS)
+    trained_model = train_model(config, train, test, FEATS)
     print('*'*20 + "Done Training" + '*'*25)
 
 

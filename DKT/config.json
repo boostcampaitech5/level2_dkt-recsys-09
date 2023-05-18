@@ -1,20 +1,26 @@
 {
-    "name": "Mnist_LeNet",
+    "name": "LGBM",
     "n_gpu": 1,
+    "seed":42,
+    "pic_dir": "save_pic/",
+    "output_dir": "output/",
 
     "arch": {
-        "type": "MnistModel",
+        "type": "",
         "args": {}
     },
     "data_loader": {
-        "type": "MnistDataLoader",
-        "args":{
-            "data_dir": "data/",
-            "batch_size": 128,
-            "shuffle": true,
-            "validation_split": 0.1,
-            "num_workers": 2
-        }
+        "data_dir": "/opt/ml/input/data/",
+        "df_train": "train_data.csv",
+        "df_test": "test_data.csv",
+        "feature_engineering": false,
+        "fe_train": "train_featured.csv",
+        "fe_test": "test_featured.csv",
+        "asset_dir": "asset/",
+        "batch_size": 128,
+        "shuffle": true,
+        "split_ratio": 0.8,
+        "num_workers": 2
     },
     "optimizer": {
         "type": "Adam",
@@ -36,15 +42,14 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "num_boost_round": 2500,
 
-        "save_dir": "saved/",
-        "save_period": 1,
-        "verbosity": 2,
+        "model_dir": "model/",
+        "verbos_eval": 100,
+        "threshold": 0.5,
         
-        "monitor": "min val_loss",
-        "early_stop": 10,
+        "early_stopping_rounds": 100,
 
-        "tensorboard": true
+        "tuning": false
     }
 }
