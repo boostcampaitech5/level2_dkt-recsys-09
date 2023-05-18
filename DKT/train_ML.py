@@ -1,4 +1,5 @@
 import os
+import argparse
 import torch
 import wandb
 import lightgbm as lgb
@@ -7,13 +8,11 @@ from matplotlib import pyplot as plt
 from args import parse_args_train
 from data_loader.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time
 from trainer.trainer_ML import train_model
+from utils import read_json, set_seed
 
-
-if __name__ == "__main__":
+def main(config):
     # init
     wandb.login()
-    args = parse_args_train()
-    args.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Data Load
     print('*'*20 + "Preparing data ..." + '*'*20)
@@ -41,10 +40,24 @@ if __name__ == "__main__":
 
     # Save a feature importance
     x = lgb.plot_importance(trained_model)
-    if not os.path.exists(args.pic_dir):
-        os.makedirs(args.pic_dir)
-    plt.savefig(os.path.join(args.pic_dir, 'lgbm_feature_importance.png'))
+    if not os.path.exists(config['pic_dir']):
+        os.makedirs(config['pic_dir'])
+    plt.savefig(os.path.join(config['pic_dir'], 'lgbm_feature_importance.png'))
     
     print('*'*25 + "Finish!!" + '*'*25)
 
+if __name__ == "__main__":
+    args = argparse.ArgumentParser(description="DKT FFM")
+    args.add_argument(
+        "-c",
+        "--config",
+        default="./config.json",
+        type=str,
+        help='config 파일 경로 (default: "./config.json")',
+    )
+    args = args.parse_args()
+    config = read_json(args.config)
 
+    config["device"] = "cuda" if torch.cuda.is_available() else "cpu"
+    set_seed(config['seed'])
+    main(config)
