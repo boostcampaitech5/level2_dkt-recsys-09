@@ -10,7 +10,9 @@ from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
 import wandb
+import os
 
+os.environ['wandb mode'] = 'offline'
 
 # fix random seeds for reproducibility
 SEED = 123
