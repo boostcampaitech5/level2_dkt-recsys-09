@@ -1,0 +1,52 @@
+{
+    "name": "HybridModel",
+    "n_gpu": 1,
+
+    "arch": {
+        "type": "MnistModel",
+        "args": {}
+    },
+    "data_loader": {
+        "type": "HMDataLoader",
+        "args":{
+            "data_dir": "/opt/ml/input/data",
+            "asset_dir": "./asset",
+            "batch_size": 512,
+            "shuffle": true,
+            "num_workers": 2,
+            "max_seq_len": 10,
+            "validation_split": 0.2
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.001,
+            "weight_decay": 0,
+            "amsgrad": true
+        }
+    },
+    "loss": "nll_loss",
+    "metrics": [
+        "accuracy", "auc"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 50,
+            "gamma": 0.1
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 2,
+        
+        "monitor": "min val_loss",
+        "early_stop": 10,
+
+        "tensorboard": true
+    }
+}
