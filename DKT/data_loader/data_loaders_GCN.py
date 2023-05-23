@@ -2,8 +2,10 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from base import BaseDataLoader
 import pandas as pd
+import numpy as np
 import os
 from .data_preprocess_GCN import ultragcn_preprocess
+from .make_user_item_interaction import __make_user_item_interaction
 
 
 class MnistDataLoader(BaseDataLoader):
@@ -46,3 +48,28 @@ class UltraGCNDataLoader(BaseDataLoader):
         self.dataset = UltraGCNDataset(data_dir)
         
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
+
+
+class LGCNtransDataset(Dataset):
+    def __init__(self, data_dir):
+        
+        if not os.path.exists(os.path.join(data_dir, "preprocessed_data.npy")) and not os.path.exists(os.path.join(data_dir, "preprocessed_data_rel.npy")) :
+            self.train = pd.read_csv(os.path.join(data_dir, "train_data.csv"))
+            self.test = pd.read_csv(os.path.join(data_dir, "test_data.csv"))
+            [train_dict, num_user, num_item], rel_dict = __make_user_item_interaction(self.train, self.test)
+
+        else:
+            [train_dict, num_user, num_item] = np.load(os.path.join(data_dir, "preprocessed_data.npy"), allow_pickle=True)
+            rel_dict = np.load(os.path.join(data_dir, "preprocessed_data_rel.npy"), allow_pickle=True)[0]
+
+        print('num_user:%d, num_item:%d' % (num_user, num_item))
+        
+        self.gcn_n_items = num_item
+        self.X = self.data.drop('answerCode', axis=1)
+        self.y = self.data.answerCode
+        
+    def __getitem__(self, index):
+        return self.X.loc[index].values, self.y.loc[index]
+    
+    def __len__(self):
+        return len(self.data)   
