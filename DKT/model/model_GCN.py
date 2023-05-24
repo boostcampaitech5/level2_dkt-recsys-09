@@ -68,7 +68,7 @@ class UltraGCN(nn.Module):
     
 class HMModel_transformer(nn.Module):
     def __init__(self, **args):
-        super(HMModel, self).__init__()
+        super(HMModel_transformer, self).__init__()
         
         # Set Parameter
         self.CONTISIZE = 5
