@@ -1,69 +1,63 @@
 import os
-import argparse
+import numpy as np
 import torch
 import wandb
-import lightgbm as lgb
-from matplotlib import pyplot as plt
+from args import parse_args
+from src import trainer
+from src.dataloader import Preprocess
+from src.utils import setSeeds, get_adj_matrix, get_adj_matrix_wo_rel, get_adj_matrix_wo_normarlize
+import random
 
-from args import parse_args_train
-from data_loader.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time
-from trainer.trainer_ML import train_model
-from utils import read_json, set_seed
 
-def main(config):
-    # init
+def main(args):
     wandb.login()
 
-    # Data Load
-    print('*'*20 + "Preparing data ..." + '*'*20)
-    df = load_data(config, config['data_loader']['df_train'])
-
-    # Preprocessing
-    print('*'*17 + "Start Preprocessing ..." + '*'*18)
-    df["Timestamp"] = df["Timestamp"].apply(convert_time)
-    if config['data_loader']['feature_engineering']:
-        df = feature_engineering(os.path.join(config['data_loader']['data_dir'], config['data_loader']['fe_train']), df)
-        print('*'*20 + "Done feature engineering" + '*'*20)
-    else:
-        df = load_data(config, config['data_loader']['fe_train'])
-        print('*'*20 + "LOAD feature engineering data" + '*'*20)
-
-    df = categorical_label_encoding(config, df, is_train=True) # LGBM을 위한 FE
+    setSeeds(args.seed)
+    args.device = "cuda" if torch.cuda.is_available() else "cpu"
     
-    train, test = custom_train_test_split(config, df)
-    print('*'*20 + "Done Preprocessing" + '*'*20)
-
-    # Make new_wandb project
-    wandb.init(project="dkt_lgbm", config=vars(config))
-
     
-    # Train model
-    print('*'*20 + "Start Training ..." + '*'*20)
-    FEATS = [col for col in df.select_dtypes(include=["int", "int8", "int16", "int64", "float", "float16", "float64"]).columns if col not in ['answerCode']]
-    trained_model = train_model(config, train, test, FEATS)
-    print('*'*20 + "Done Training" + '*'*25)
-
-
-    # Save a feature importance
-    x = lgb.plot_importance(trained_model)
-    if not os.path.exists(config['pic_dir']):
-        os.makedirs(config['pic_dir'])
-    plt.savefig(os.path.join(config['pic_dir'], 'lgbm_feature_importance.png'))
     
-    print('*'*25 + "Finish!!" + '*'*25)
+    [train_dict, num_user, num_item] = np.load('/opt/ml/input/data/preprocessed_data.npy', allow_pickle=True)
+    rel_dict = np.load('/opt/ml/input/data/preprocessed_data_rel.npy', allow_pickle=True)[0]
+    print('num_user:%d, num_item:%d' % (num_user, num_item))
+    args.gcn_n_items = num_item
+    
+    train_dict_len = [len(train_dict[u]) for u in train_dict]
+    print('max len: %d, min len:%d, avg len:%.2f' % (np.max(train_dict_len), np.min(train_dict_len), np.mean(train_dict_len)))
+    
+    
+    # adj_matrix_wo_normarlize = get_adj_matrix_wo_normarlize(train_dict, num_item, args.max_seq_len)
+    adj_matrix = get_adj_matrix(train_dict, rel_dict, num_item, args.alpha, args.beta, args.max_seq_len)
+    
+    
+    print('Model preparing...')
+    
+    preprocess = Preprocess(args=args)
+    preprocess.load_train_data(args.file_name)
+    train_data = preprocess.get_train_data()
+
+    train_data, valid_data = preprocess.split_data(train_data)
+    
+    name_dict = {
+        'model': args.model,
+        'n_epochs': args.n_epochs,
+        'batch_size': args.batch_size,
+        'lr': args.lr,
+        'max_seq_len': args.max_seq_len,
+        'hidden_dim': args.hidden_dim,
+    }
+    
+    name = ''
+    for key, value in name_dict.items():
+        name += f'{key}_{value}, '
+        
+    wandb.init(project="LGCNtrans", config=vars(args), name=name, entity="ffm")
+    model = trainer.get_model(args, adj_matrix).to(args.device)
+    # trainer.run(args, train_data, valid_data, model)
+    trainer.run_with_vaild_loss(args, train_data, valid_data, model)
+
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="DKT FFM")
-    args.add_argument(
-        "-c",
-        "--config",
-        default="config/config_lgcntrans.json",
-        type=str,
-        help='config 파일 경로 (default: "./config.json")',
-    )
-    args = args.parse_args()
-    config = read_json(args.config)
-
-    config["device"] = "cuda" if torch.cuda.is_available() else "cpu"
-    set_seed(config['seed'])
-    main(config)
+    args = parse_args()
+    os.makedirs(args.model_dir, exist_ok=True)
+    main(args)
