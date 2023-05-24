@@ -40,9 +40,10 @@ class UltraGCNDataset(Dataset):
 
 
 class UltraGCNDataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=False, num_workers=1, validation_split=0.0):
+    def __init__(self, data_dir, batch_size, shuffle=False, num_workers=1, validation_split=0.0, random_seed=42, fold=0):
         
         self.data_dir = data_dir
+        self.random_seed = random_seed
         self.dataset = UltraGCNDataset(data_dir)
         
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
+        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers, fold)
