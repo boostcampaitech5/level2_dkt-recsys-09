@@ -105,6 +105,7 @@ data/
 input/
 saved/
 datasets/
+submission/
 
 # editor, os cache directory
 .vscode/
@@ -121,3 +122,4 @@ asset/
 save_pic/
 *.txt
 *.png
+*.pickle
