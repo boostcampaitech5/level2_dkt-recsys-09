@@ -26,96 +26,6 @@ def fe(df):
         df[f'{new_feature_name}_ans_sum'] = df[col_name].map(sum_series)
         
         return df
-        
-        
-    # 난이도 설정을 위한 ELO 사용
-    def get_ELO_function(df):
-        def get_new_theta(is_good_answer, beta, left_asymptote, theta, nb_previous_answers):
-            return theta + learning_rate_theta(nb_previous_answers) * (
-                is_good_answer - probability_of_good_answer(theta, beta, left_asymptote)
-            )
-
-        def get_new_beta(is_good_answer, beta, left_asymptote, theta, nb_previous_answers):
-            return beta - learning_rate_beta(nb_previous_answers) * (
-                is_good_answer - probability_of_good_answer(theta, beta, left_asymptote)
-            )
-
-        def learning_rate_theta(nb_answers):
-            return max(0.3 / (1 + 0.01 * nb_answers), 0.04)
-
-        def learning_rate_beta(nb_answers):
-            return 1 / (1 + 0.05 * nb_answers)
-
-        def probability_of_good_answer(theta, beta, left_asymptote):
-            return left_asymptote + (1 - left_asymptote) * sigmoid(theta - beta)
-
-        def sigmoid(x):
-            return 1 / (1 + np.exp(-x))
-
-        def estimate_parameters(answers_df, granularity_feature_name="assessmentItemID"):
-            item_parameters = {
-                granularity_feature_value: {"beta": 0, "nb_answers": 0}
-                for granularity_feature_value in np.unique(
-                    answers_df[granularity_feature_name]
-                )
-            }
-            student_parameters = {
-                student_id: {"theta": 0, "nb_answers": 0}
-                for student_id in np.unique(answers_df.userID)
-            }
-
-            print("Parameter estimation is starting...")
-
-            for student_id, item_id, left_asymptote, answered_correctly in tqdm.tqdm(
-                zip(
-                    answers_df.userID.values,
-                    answers_df[granularity_feature_name].values,
-                    answers_df.left_asymptote.values,
-                    answers_df.answerCode.values,
-                )
-            ):
-                theta = student_parameters[student_id]["theta"]
-                beta = item_parameters[item_id]["beta"]
-
-                item_parameters[item_id]["beta"] = get_new_beta(
-                    answered_correctly,
-                    beta,
-                    left_asymptote,
-                    theta,
-                    item_parameters[item_id]["nb_answers"],
-                )
-                student_parameters[student_id]["theta"] = get_new_theta(
-                    answered_correctly,
-                    beta,
-                    left_asymptote,
-                    theta,
-                    student_parameters[student_id]["nb_answers"],
-                )
-
-                item_parameters[item_id]["nb_answers"] += 1
-                student_parameters[student_id]["nb_answers"] += 1
-
-            print(f"Theta & beta estimations on {granularity_feature_name} are completed.")
-            return student_parameters, item_parameters
-
-        def gou_func(theta, beta):
-            return 1 / (1 + np.exp(-(theta - beta)))
-
-        df["left_asymptote"] = 0
-
-        print(f"Dataset of shape {df.shape}")
-        print(f"Columns are {list(df.columns)}")
-
-        student_parameters, item_parameters = estimate_parameters(df)
-
-        prob = [
-            gou_func(student_parameters[student]["theta"], item_parameters[item]["beta"])
-            for student, item in zip(df.userID.values, df.assessmentItemID.values)
-        ]
-
-        df["elo_prob"] = prob
-
-        return df
     
     
     def get_elap_time(df):
@@ -170,7 +80,6 @@ def fe(df):
     
     # create elap_time, ELO, mission' featurem, user_mean
     df = get_elap_time(df)
-    df = get_ELO_function(df)
     df = get_mission_feature(df)
     df = get_user_mean(df)
     
@@ -180,20 +89,5 @@ def fe(df):
     df = new_feature_answer(df, 'assessmentItemID', 'assess')
     
     df['recent3_elap_time'] = df.groupby(['userID'])['elap_time'].rolling(3).mean().fillna(0).values
-    
-    
-    # time_df = df[["userID", "prefix", "Timestamp"]].sort_values(by=["userID", "prefix", "Timestamp"])
-    # time_df["first"] = time_df[["userID_reset", "prefix_reset"]].any(axis=1).apply(lambda x: 1 - int(x))
-    # time_df["reset_time"] = time_df["Timestamp"].diff().fillna(pd.Timedelta(seconds=0))
-    # time_df["reset_time"] = (
-    #     time_df["reset_time"].apply(lambda x: x.total_seconds()) * time_df["first"]
-    # )
-    # df["reset_time"] = time_df["reset_time"]#.apply(lambda x: math.log(x + 1))
-    
-    # time_df["reset_time"] = time_df["Timestamp"].diff().fillna(pd.Timedelta(seconds=0))
-    # time_df["reset_time"] = (
-    #     time_df["reset_time"].apply(lambda x: x.total_seconds()) * time_df["first"]
-    # )
-    # df["reset_time"] = time_df["reset_time"]#.apply(lambda x: math.log(x + 1))
     
     return df
