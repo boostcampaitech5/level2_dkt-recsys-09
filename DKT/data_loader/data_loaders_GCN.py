@@ -67,10 +67,10 @@ class HMDataset(Dataset):
         
         # cont
         user_mean, user_acc, elap_time, recent3_elap_time = np.log1p(row[4]), np.log1p(row[5]), np.log1p(row[6]), np.log1p(row[7])
-        elo_prob, assess_ans_mean, prefix =  np.log1p(row[8]), np.log1p(row[9]), np.log1p(row[10])
+        assess_ans_mean, prefix = np.log1p(row[8]), np.log1p(row[9])
 
         cate_cols = [test, question, tag, correct]
-        cont_columns = [user_mean, user_acc, elap_time, recent3_elap_time, elo_prob, assess_ans_mean, prefix]
+        cont_columns = [user_mean, user_acc, elap_time, recent3_elap_time, assess_ans_mean, prefix]
         total_cols = cate_cols + cont_columns
 
         # max seq len을 고려하여서 이보다 길면 자르고 아닐 경우 그대로 냅둔다
