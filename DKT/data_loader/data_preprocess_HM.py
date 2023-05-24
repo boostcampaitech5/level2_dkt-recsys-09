@@ -112,7 +112,6 @@ class Preprocess:
                     r["user_acc"].values,
                     r["elap_time"].values,
                     r["recent3_elap_time"].values,
-                    r["elo_prob"].values,
                     r["assess_ans_mean"].values,
                     r["prefix"].values,
                 )
