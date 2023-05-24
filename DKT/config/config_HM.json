@@ -3,8 +3,18 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "MnistModel",
-        "args": {}
+        "type": "HMModel",
+        "args": {
+            "user_num": 7442,
+            "item_num": 9454,
+            "embedding_dim": 64,
+            "gamma": 1e-4,
+            "lambda": 0.8,
+            "hidden_dim": 64,
+            "n_layers": 3,
+            "n_heads": 5,
+            "drop_out": 0.1
+        }
     },
     "data_loader": {
         "type": "HMDataLoader",
@@ -26,7 +36,7 @@
             "amsgrad": true
         }
     },
-    "loss": "nll_loss",
+    "loss": "HM_loss",
     "metrics": [
         "accuracy", "auc"
     ],
@@ -48,5 +58,12 @@
         "early_stop": 10,
 
         "tensorboard": true
+    },
+    "test": {
+        "data_dir": "~/input/data/test_data_modify.csv",
+        "model_dir": "./saved/models/UltraGCN/0518_033541/model_best.pth",
+        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_submission.csv",
+        "sample_submission_dir": "~/input/data/sample_submission.csv",
+        "batch_size": 512
     }
 }
