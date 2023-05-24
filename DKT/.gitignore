@@ -105,8 +105,20 @@ data/
 input/
 saved/
 datasets/
+submission/
 
 # editor, os cache directory
 .vscode/
 .idea/
 __MACOSX/
+
+# wandb
+wandb/
+
+asset/
+
+# model
+save_pic/
+*.txt
+*.png
+*.pickle
