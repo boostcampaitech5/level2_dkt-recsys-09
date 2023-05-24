@@ -66,7 +66,7 @@ class UltraGCN(nn.Module):
          
         return (user_embeds * item_embeds).sum(dim=-1).sigmoid()
     
-class HMModel(nn.Module):
+class HMModel_transformer(nn.Module):
     def __init__(self, **args):
         super(HMModel, self).__init__()
         
@@ -189,7 +189,7 @@ class HMModel_lstm(nn.Module):
         
         
         # =============== GCN embedding, embedding_question===================================================
-        self.model = UltraGCN(params=args['ultragcn'])
+        self.model = UltraGCN(**args['ultragcn'])
         self.model.load_state_dict(torch.load(args['model_dir'])['state_dict'])
         
         self.gcn_embedding = self.model.item_embeds.to('cuda')
