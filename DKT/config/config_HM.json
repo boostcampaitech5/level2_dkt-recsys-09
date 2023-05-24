@@ -5,15 +5,22 @@
     "arch": {
         "type": "HMModel",
         "args": {
-            "user_num": 7442,
-            "item_num": 9454,
-            "embedding_dim": 64,
+            "n_test": 1537,
+            "n_tag": 912,
             "gamma": 1e-4,
             "lambda": 0.8,
-            "hidden_dim": 64,
-            "n_layers": 3,
-            "n_heads": 5,
-            "drop_out": 0.1
+            "hidden_dim": 256,
+            "n_layers": 4,
+            "n_heads": 4,
+            "drop_out": 0.4,
+            "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/UltraGCN/0524_043901/model_best.pth",
+            "ultragcn": {
+                "user_num": 7442,
+                "item_num": 9454,
+                "embedding_dim": 64,
+                "gamma": 1e-4,
+                "lambda": 0.8
+            }
         }
     },
     "data_loader": {
@@ -24,7 +31,7 @@
             "batch_size": 512,
             "shuffle": true,
             "num_workers": 2,
-            "max_seq_len": 10,
+            "max_seq_len": 200,
             "validation_split": 0.2
         }
     },
@@ -36,7 +43,7 @@
             "amsgrad": true
         }
     },
-    "loss": "HM_loss",
+    "loss": "BCE_loss",
     "metrics": [
         "accuracy", "auc"
     ],
@@ -61,9 +68,9 @@
     },
     "test": {
         "data_dir": "~/input/data/test_data_modify.csv",
-        "model_dir": "./saved/models/UltraGCN/0518_033541/model_best.pth",
-        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_submission.csv",
+        "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/HybridModel/0524_140145/checkpoint-epoch7.pth",
+        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_HM_fr_7.csv",
         "sample_submission_dir": "~/input/data/sample_submission.csv",
-        "batch_size": 512
+        "batch_size": 128
     }
 }
