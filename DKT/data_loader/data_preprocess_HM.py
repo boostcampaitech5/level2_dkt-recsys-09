@@ -96,7 +96,7 @@ class Preprocess:
 
         df = df.sort_values(by=["userID", "Timestamp"], axis=0)
         cat_columns = ["userID", "assessmentItemID", "testId", "answerCode", "KnowledgeTag"]
-        cont_columns = ['user_mean', 'user_acc', 'elap_time', 'recent3_elap_time', 'elo_prob', 'assess_ans_mean', 'prefix']
+        cont_columns = ['user_mean', 'user_acc', 'elap_time', 'recent3_elap_time', 'assess_ans_mean', 'prefix']
         
         columns = cat_columns + cont_columns
         group = (
