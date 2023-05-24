@@ -3,14 +3,14 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "HMModel",
+        "type": "HMModel_lstm",
         "args": {
             "n_test": 1537,
             "n_tag": 912,
             "gamma": 1e-4,
             "lambda": 0.8,
             "hidden_dim": 256,
-            "n_layers": 4,
+            "n_layers": 3,
             "n_heads": 4,
             "drop_out": 0.4,
             "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/UltraGCN/0524_043901/model_best.pth",
@@ -32,7 +32,10 @@
             "shuffle": true,
             "num_workers": 2,
             "max_seq_len": 200,
-            "validation_split": 0.2
+            "validation_split": 0.2,
+            "stride": 10,
+            "shuffle_n": 2,
+            "shuffle_aug": false
         }
     },
     "optimizer": {
@@ -68,8 +71,8 @@
     },
     "test": {
         "data_dir": "~/input/data/test_data_modify.csv",
-        "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/HybridModel/0524_140145/checkpoint-epoch7.pth",
-        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_HM_fr_7.csv",
+        "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/HybridModel/0524_162035/model_best.pth",
+        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_HM_aug_lstm.csv",
         "sample_submission_dir": "~/input/data/sample_submission.csv",
         "batch_size": 128
     }
