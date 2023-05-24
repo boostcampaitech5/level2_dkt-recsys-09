@@ -40,3 +40,8 @@ def UltraGCN_loss(model, output, data, target):
     loss += model.gamma * norm_loss(model)
 
     return loss
+
+
+def BCE_loss(output, target):
+    loss = torch.nn.BCELoss(reduction="none")
+    return torch.mean(loss(output, target))
