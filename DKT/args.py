@@ -1,56 +1,78 @@
 import argparse
 
 
-def parse_args_train():
+def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--seed", default=42, type=int, help="seed")
 
-    parser.add_argument("--device", default="cpu", type=str, help="cpu or gpu")
+    parser.add_argument("--device", default="gpu", type=str, help="cpu or gpu")
 
-    parser.add_argument("--data_dir", default="data/", type=str, help="data directory",)
+    parser.add_argument(
+        "--data_dir",
+        default="/opt/ml/input/data/",
+        type=str,
+        help="data directory",
+    )
+    parser.add_argument(
+        "--asset_dir", default="asset/", type=str, help="data directory"
+    )
 
-    parser.add_argument("--asset_dir", default="asset/", type=str, help="assest directory",)
+    parser.add_argument(
+        "--file_name", default="train_data.csv", type=str, help="train file name"
+    )
 
-    parser.add_argument("--split_ratio", default=0.7, type=float, help="train ratio (default: 0.7)")
+    parser.add_argument(
+        "--model_dir", default="models/", type=str, help="model directory"
+    )
+    parser.add_argument(
+        "--model_name", default="model.pt", type=str, help="model file name"
+    )
 
-    parser.add_argument("--verbos_eval", default=100, type=int, help="model verbos_eval")
+    parser.add_argument(
+        "--output_dir", default="output/", type=str, help="output directory"
+    )
+    parser.add_argument(
+        "--test_file_name", default="test_data.csv", type=str, help="test file name"
+    )
 
-    parser.add_argument("--num_boost_round", default=2500, type=int, help="model num_boost_round")
+    
+    parser.add_argument("--num_workers", default=4, type=int, help="number of workers")
+    
 
-    parser.add_argument("--early_stopping_rounds", default=100, type=int, help="model early_stopping_rounds")
+    # parser.add_argument("--gcn_n_items", default=9454, type=int, help="total items")
+    
+    # 모델 파라미터
+    parser.add_argument("--max_seq_len", default=200, type=int, help="max sequence length")
+    parser.add_argument("--hidden_dim", default=256, type=int, help="hidden dimension size")
+    parser.add_argument("--n_layers", default=2, type=int, help="number of layers")
+    parser.add_argument("--n_heads", default=4, type=int, help="number of heads")
+    parser.add_argument("--drop_out", default=0.4, type=float, help="drop out rate")
+    parser.add_argument("--gcn_n_layes", default=2, type=int, help="gcn layers")
+    parser.add_argument('--alpha', type=float, default=1.0, help="weight of seq Adj")
+    parser.add_argument('--beta', type=float, default=1.0, help="weight of sem Adj")
+    
 
-    parser.add_argument("--threshold", default=0.5, type=float, help="predict threshold")
+    # 훈련
+    parser.add_argument("--n_epochs", default=60, type=int, help="number of epochs")
+    parser.add_argument("--batch_size", default=32, type=int, help="batch size")
+    parser.add_argument("--lr", default=0.000001, type=float, help="learning rate")
+    parser.add_argument("--clip_grad", default=10, type=int, help="clip grad")
+    parser.add_argument("--patience", default=100, type=int, help="for early stopping")
+    
+    
 
-    parser.add_argument("--pic_dir", default="save_pic/", type=str, help="picture directory")
+    parser.add_argument(
+        "--log_steps", default=50, type=int, help="print log per n steps"
+    )
 
-    parser.add_argument("--output_dir", default="output/", type=str, help="output directory")
-
-    parser.add_argument("--model_dir", default="model/", type=str, help="model directory")
-
-    parser.add_argument("--df_name", default="train_data.csv", type=str, help="train_df name")
-
-    args = parser.parse_args()
-
-    return args
-
-
-def parse_args_test():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--seed", default=42, type=int, help="seed")
-
-    parser.add_argument("--device", default="cpu", type=str, help="cpu or gpu")
-
-    parser.add_argument("--data_dir", default="data/", type=str, help="data directory",)
-
-    parser.add_argument("--asset_dir", default="asset/", type=str, help="assest directory",)
-
-    #parser.add_argument("--output_dir", default="output/", type=str, help="output directory")
-
-    parser.add_argument("--model_dir", default="model/", type=str, help="model directory")
-
-    parser.add_argument("--df_name", default="test_data.csv", type=str, help="test_df name")
+    ### 중요 ###
+    parser.add_argument("--model", default="geslstmattn", type=str, help="model type")
+    parser.add_argument("--optimizer", default="adam", type=str, help="optimizer type")
+    parser.add_argument(
+        "--scheduler", default="plateau", type=str, help="scheduler type"
+    )
+    
 
     args = parser.parse_args()
 
