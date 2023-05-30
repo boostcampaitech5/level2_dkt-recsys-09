@@ -3,11 +3,13 @@ import numpy as np
 import torch
 import wandb
 from args import parse_args
-from src import trainer
-from src.dataloader import Preprocess
-from src.utils import setSeeds, get_adj_matrix, get_adj_matrix_wo_rel, get_adj_matrix_wo_normarlize
+from trainer import trainer_lgcnlstmattn
+from data_loader.dataloader_lgcnlstmattn import Preprocess
+from src.utils import setSeeds, get_adj_matrix
 import random
-
+from parse_config import ConfigParser
+import argparse
+import collections
 
 def main(args):
     wandb.login()
@@ -52,12 +54,25 @@ def main(args):
         name += f'{key}_{value}, '
         
     wandb.init(project="LGCNtrans", config=vars(args), name=name, entity="ffm")
-    model = trainer.get_model(args, adj_matrix).to(args.device)
+    model = trainer_lgcnlstmattn.get_model(args, adj_matrix).to(args.device)
     # trainer.run(args, train_data, valid_data, model)
-    trainer.run_with_vaild_loss(args, train_data, valid_data, model)
+    trainer_lgcnlstmattn.run_with_vaild_loss(args, train_data, valid_data, model)
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    os.makedirs(args.model_dir, exist_ok=True)
-    main(args)
+    args = argparse.ArgumentParser(description='PyTorch Template')
+    args.add_argument('-c', '--config', default=None, type=str,
+                      help='config file path (default: None)')
+    args.add_argument('-r', '--resume', default=None, type=str,
+                      help='path to latest checkpoint (default: None)')
+    args.add_argument('-d', '--device', default=None, type=str,
+                      help='indices of GPUs to enable (default: all)')
+
+    # custom cli options to modify configuration from default values given in json file.
+    CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
+    options = [
+        CustomArgs(['--lr', '--learning_rate'], type=float, target='optimizer;args;lr'),
+        CustomArgs(['--bs', '--batch_size'], type=int, target='data_loader;args;batch_size')
+    ]
+    config = ConfigParser.from_args(args, options)
+    main(config)

@@ -9,7 +9,7 @@ import torch
 import tqdm
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import KFold
-from .feature_engine import fe
+from src.feature_engine import fe
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

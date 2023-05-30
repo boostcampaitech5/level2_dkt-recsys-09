@@ -1,16 +1,13 @@
 import os
 import torch
 from args import parse_args
-from src import trainer
-from src.dataloader import Preprocess
-from src.utils import setSeeds, get_adj_matrix, get_adj_matrix_wo_rel, get_adj_matrix_wo_normarlize
+from trainer import trainer_lgcnlstmattn
+from data_loader.dataloader_lgcnlstmattn import Preprocess
+from src.utils import get_adj_matrix
 import numpy as np
 from args import parse_args
-
-from src.dataloader import Preprocess
-
-
-
+import argparse
+from parse_config import ConfigParser
 
 def main(args):
     args.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -33,11 +30,18 @@ def main(args):
     
     test_data = preprocess.get_test_data()
     # model = trainer.get_model(args).to(args.device)
-    model = trainer.load_model(args, adj_matrix).to(args.device)
-    trainer.inference(args, test_data, model)
+    model = trainer_lgcnlstmattn.load_model(args, adj_matrix).to(args.device)
+    trainer_lgcnlstmattn.inference(args, test_data, model)
 
 
-if __name__ == "__main__":
-    args = parse_args()
-    os.makedirs(args.model_dir, exist_ok=True)
-    main(args)
+if __name__ == '__main__':
+    args = argparse.ArgumentParser(description='PyTorch Template')
+    args.add_argument('-c', '--config', default=None, type=str,
+                      help='config file path (default: None)')
+    args.add_argument('-r', '--resume', default=None, type=str,
+                      help='path to latest checkpoint (default: None)')
+    args.add_argument('-d', '--device', default=None, type=str,
+                      help='indices of GPUs to enable (default: all)')
+
+    config = ConfigParser.from_args(args)
+    main(config)

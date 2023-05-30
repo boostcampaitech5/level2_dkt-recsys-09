@@ -4,15 +4,22 @@ import os
 import torch
 import wandb
 
-from .criterion import get_criterion
-from .dataloader import get_loaders, get_GES_loaders
+from src.criterion import get_criterion 
+from data_loader.dataloader_lgcnlstmattn import get_loaders, get_GES_loaders
 
-from .metric import get_metric
-from .model import *
-from .optimizer import get_optimizer
-from .scheduler import get_scheduler
+from src.metric import get_metric
+from src.optimizer import get_optimizer
+from src.scheduler import get_scheduler
 from datetime import datetime
 
+from model import model_lgcnlstmattn #GESLSTMATTN
+
+def get_model(args, adj_matrix):
+
+    model = model_lgcnlstmattn.GESLSTMATTN(args, adj_matrix)
+
+
+    return model
 
 def run(args, train_data, valid_data, model):
     train_loader, valid_loader = get_loaders(args, train_data, valid_data)
@@ -267,24 +274,7 @@ def inference(args, test_data, model):
             w.write("{},{}\n".format(id, p))
 
 
-def get_model(args, adj_matrix):
-    """
-    Load model and move tensors to a given devices.
-    """
-    if args.model == "lstm":
-        model = LSTM(args)
-    if args.model == "lstmattn":
-        model = LSTMATTN(args)
-    if args.model == "bert":
-        model = Bert(args)
-    if args.model == "geslstm":
-        model = GESLSTM(args, adj_matrix)
-    if args.model == "geslstmattn":
-        model = GESLSTMATTN(args, adj_matrix)
-    if args.model == "gesbert":
-        model = GESBert(args, adj_matrix)
 
-    return model
 
 
 # 배치 전처리

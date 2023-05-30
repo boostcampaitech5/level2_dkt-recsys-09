@@ -1,9 +1,9 @@
 {
-    "name": "UltraGCN",
+    "name": "lgcnLSTMattn",
     "n_gpu": 1,
 
     "arch": {
-        "type": "LightGCNtrans",
+        "type": "lgcnLSTMattn",
         "args": {
             "user_num": 7442,
             "item_num": 9454,
@@ -13,7 +13,7 @@
         }
     },
     "data_loader": {
-        "type": "LightGCNtransDataLoader",
+        "type": "lgcnLSTMattnDataLoader",
         "args":{
             "data_dir": "/opt/ml/input/data/",
             "batch_size": 512,
@@ -30,7 +30,7 @@
             "amsgrad": true
         }
     },
-    "loss": "UltraGCN_loss",
+    "loss": "lgcnLSTMattn_loss",
     "metrics": [
         "accuracy",
         "auc"
@@ -42,8 +42,23 @@
             "gamma": 0.1
         }
     },
+    "model": {
+        "max_seq_len": 200,
+        "hidden_dim": 256,
+        "n_layers": 2,
+        "n_heads": 4,
+        "drop_out": 0.4,
+        "gcn_n_layes": 2,
+        "alpha": 1.0,
+        "beta": 1.0
+    },
     "trainer": {
-        "epochs": 4,
+        "n_epochs": 60,
+        "batch_size": 70,
+        "lr": 0.000001,
+        "clip_grad" : 10,
+        "patience": 100,
+        "log_step": 50,
 
         "save_dir": "saved/",
         "save_period": 1,
@@ -57,7 +72,7 @@
     "test": {
         "data_dir": "~/input/data/test_data_modify.csv",
         "model_dir": "./saved/models/LGCNtrans/0518_033541/model_best.pth",
-        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/lgcntrans_submission.csv",
+        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/lgcnLSTMattn_submission.csv",
         "sample_submission_dir": "~/input/data/sample_submission.csv",
         "batch_size": 512
     }
