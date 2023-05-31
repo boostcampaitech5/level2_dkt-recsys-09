@@ -3,10 +3,6 @@ import time
 import datetime
 import pickle
 import torch
-import os
-from sklearn.preprocessing import LabelEncoder
-import numpy as np
-
 
 def ultragcn_preprocess(train, test):
     
@@ -30,15 +26,19 @@ def ultragcn_preprocess(train, test):
 def _indexing(data):
     
     # userID와 itemID indexing
-    userid, itemid = sorted(list(set(data.userID))), sorted(list(set(data.assessmentItemID)))
+    userid, itemid, testid, knowledgetag = sorted(list(set(data.userID))), sorted(list(set(data.assessmentItemID))), sorted(list(set(data.testId))), sorted(list(set(data.KnowledgeTag)))
 
     userid_2_index = {v:i for i,v in enumerate(userid)}
     itemid_2_index = {v:i for i,v in enumerate(itemid)}
+    testid_2_index = {v:i for i,v in enumerate(testid)}
+    tag_2_index = {v:i for i,v in enumerate(knowledgetag)}
     
     data.userID = data.userID.map(userid_2_index)
     data.assessmentItemID = data.assessmentItemID.map(itemid_2_index)
+    data.testId = data.testId.map(testid_2_index)
+    data.KnowledgeTag = data.KnowledgeTag.map(tag_2_index)
 
-    return data[['userID', 'assessmentItemID', 'answerCode']]
+    return data[['userID', 'assessmentItemID', 'answerCode', 'testId', 'KnowledgeTag']]
 
 
 def save_constraint_matrix(data):

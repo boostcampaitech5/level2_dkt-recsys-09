@@ -57,7 +57,7 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="./config.json",
+        default="config/config_LGBM.json",
         type=str,
         help='config 파일 경로 (default: "./config.json")',
     )

@@ -106,6 +106,7 @@ input/
 saved/
 datasets/
 submission/
+output/
 
 # editor, os cache directory
 .vscode/
@@ -120,6 +121,7 @@ asset/
 
 # model
 save_pic/
-*.txt
 *.png
 *.pickle
+*.pkl
+lgbm_model.txt
