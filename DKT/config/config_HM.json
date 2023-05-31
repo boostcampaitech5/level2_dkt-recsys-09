@@ -1,6 +1,7 @@
 {
     "name": "HybridModel",
     "n_gpu": 1,
+    "fold": false,
 
     "arch": {
         "type": "HMModel_lstm",
