@@ -13,7 +13,7 @@
         "data_dir": "/opt/ml/input/data/",
         "df_train": "train_data.csv",
         "df_test": "test_data.csv",
-        "feature_engineering": false,
+        "feature_engineering": true,
         "fe_train": "train_featured.csv",
         "fe_test": "test_featured.csv",
         "asset_dir": "asset/",
