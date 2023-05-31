@@ -1,3 +1,6 @@
+import os
+import random
+import numpy as np
 import json
 import torch
 import pandas as pd
@@ -5,6 +8,15 @@ from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
 
+def set_seed(seed=417):
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
 
 def ensure_dir(dirname):
     dirname = Path(dirname)

@@ -8,7 +8,7 @@ class BaseTrainer:
     """
     Base class for all trainers
     """
-    def __init__(self, model, criterion, metric_ftns, optimizer, config):
+    def __init__(self, model, criterion, metric_ftns, optimizer, config, fold):
         self.config = config
         self.logger = config.get_logger('trainer', config['trainer']['verbosity'])
 
@@ -16,6 +16,7 @@ class BaseTrainer:
         self.criterion = criterion
         self.metric_ftns = metric_ftns
         self.optimizer = optimizer
+        self.fold = fold
 
         cfg_trainer = config['trainer']
         self.epochs = cfg_trainer['epochs']
@@ -119,9 +120,9 @@ class BaseTrainer:
         torch.save(state, filename)
         self.logger.info("Saving checkpoint: {} ...".format(filename))
         if save_best:
-            best_path = str(self.checkpoint_dir / 'model_best.pth')
+            best_path = str(self.checkpoint_dir / 'model_best{}.pth'.format(self.fold))
             torch.save(state, best_path)
-            self.logger.info("Saving current best: model_best.pth ...")
+            self.logger.info("Saving current best: model_best{}.pth ...".format(self.fold))
 
     def _resume_checkpoint(self, resume_path):
         """
