@@ -113,7 +113,6 @@ output/
 .idea/
 __MACOSX/
 
-
 # wandb
 wandb/
 
@@ -121,6 +120,8 @@ asset/
 
 # model
 save_pic/
+*.png
+*.pickle
 *.png
 *.pickle
 *.pkl
