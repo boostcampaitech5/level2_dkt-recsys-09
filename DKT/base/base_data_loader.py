@@ -2,15 +2,17 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import SubsetRandomSampler
+from sklearn.model_selection import KFold
 
 
 class BaseDataLoader(DataLoader):
     """
     Base class for all data loaders
     """
-    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers, collate_fn=default_collate):
+    def __init__(self, dataset, batch_size, shuffle, validation_split, num_workers, fold, collate_fn=default_collate):
         self.validation_split = validation_split
         self.shuffle = shuffle
+        self.fold = fold
 
         self.batch_idx = 0
         self.n_samples = len(dataset)
@@ -42,8 +44,21 @@ class BaseDataLoader(DataLoader):
         else:
             len_valid = int(self.n_samples * split)
 
-        valid_idx = idx_full[0:len_valid]
-        train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        if self.fold == 0:
+            valid_idx = idx_full[0:len_valid]
+            train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        elif self.fold == 1:
+            valid_idx = idx_full[len_valid:2*len_valid]
+            train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        elif self.fold == 2:
+            valid_idx = idx_full[2*len_valid:3*len_valid]
+            train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        elif self.fold == 3:
+            valid_idx = idx_full[3*len_valid:4*len_valid]
+            train_idx = np.delete(idx_full, np.arange(0, len_valid))
+        else:
+            valid_idx = idx_full[4*len_valid:]
+            train_idx = np.delete(idx_full, np.arange(0, len_valid))
 
         train_sampler = SubsetRandomSampler(train_idx)
         valid_sampler = SubsetRandomSampler(valid_idx)

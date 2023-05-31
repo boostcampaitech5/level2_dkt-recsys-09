@@ -1,6 +1,7 @@
 {
     "name": "UltraGCN",
     "n_gpu": 1,
+    "fold":false,
 
     "arch": {
         "type": "UltraGCN",
@@ -19,7 +20,8 @@
             "batch_size": 512,
             "shuffle": true,
             "num_workers": 2,
-            "validation_split": 0.2
+            "validation_split": 0.2,
+            "random_seed": 42
         }
     },
     "optimizer": {
@@ -56,8 +58,8 @@
     },
     "test": {
         "data_dir": "~/input/data/test_data_modify.csv",
-        "model_dir": "./saved/models/UltraGCN/0518_033541/model_best.pth",
-        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_submission.csv",
+        "model_dir": "./saved/models/UltraGCN/0531_020223/model_best",
+        "submission_dir": "./submission/UltraGCN_submission.csv",
         "sample_submission_dir": "~/input/data/sample_submission.csv",
         "batch_size": 512
     }
