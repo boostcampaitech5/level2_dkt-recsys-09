@@ -1,5 +1,9 @@
 import argparse
 import torch
+import sys
+
+sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+
 import model.model_GCN as module_arch
 from parse_config import ConfigParser
 import pandas as pd

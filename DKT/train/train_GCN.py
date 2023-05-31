@@ -2,12 +2,16 @@ import argparse
 import collections
 import torch
 import numpy as np
+import sys
+
+sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+
 from data_loader.data_loaders_GCN import UltraGCNDataLoader
 import model.loss_GCN as module_loss
 import model.metric_GCN as module_metric
 import model.model_GCN as module_arch
 from parse_config import ConfigParser
-from trainer import Trainer
+from trainer.trainer_GCN import Trainer
 from utils import prepare_device
 import wandb
 import os
