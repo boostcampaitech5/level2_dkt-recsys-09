@@ -1,9 +1,12 @@
 import os
 import torch
-from args import parse_args
+import sys
+
+sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+
 from trainer import trainer_lgcnlstmattn
 from data_loader.dataloader_lgcnlstmattn import Preprocess
-from src.utils import get_adj_matrix
+from utils.util_lgcnlstmattn import get_adj_matrix
 import numpy as np
 from args import parse_args
 import argparse

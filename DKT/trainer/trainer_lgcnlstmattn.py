@@ -4,85 +4,22 @@ import os
 import torch
 import wandb
 
-from src.criterion import get_criterion 
-from data_loader.dataloader_lgcnlstmattn import get_loaders, get_GES_loaders
+from model.criterion_lgcnlstmattn import get_criterion 
+from data_loader.dataloader_lgcnlstmattn import get_GES_loaders
 
-from src.metric import get_metric
-from src.optimizer import get_optimizer
-from src.scheduler import get_scheduler
+from model.metric_lgcnlstmattn import get_metric
+from model.optimizer_lgcnlstmattn import get_optimizer
+from model.scheduler_lgcnlstmattn import get_scheduler
 from datetime import datetime
 
 from model import model_lgcnlstmattn #GESLSTMATTN
 
-def get_model(args, adj_matrix):
+def get_model(adj_matrix, **args):
 
-    model = model_lgcnlstmattn.GESLSTMATTN(args, adj_matrix)
+    model = model_lgcnlstmattn.GESLSTMATTN(adj_matrix, **args)
 
 
     return model
-
-def run(args, train_data, valid_data, model):
-    train_loader, valid_loader = get_loaders(args, train_data, valid_data)
-    
-
-    # only when using warmup scheduler
-    args.total_steps = int(math.ceil(len(train_loader.dataset) / args.batch_size)) * (
-        args.n_epochs
-    )
-    args.warmup_steps = args.total_steps // 10
-
-    optimizer = get_optimizer(model, args)
-    scheduler = get_scheduler(optimizer, args)
-
-    best_auc = -1
-    early_stopping_counter = 0
-    for epoch in range(args.n_epochs):
-
-        print(f"Start Training: Epoch {epoch + 1}")
-
-        ### TRAIN
-        train_auc, train_acc, train_loss = train(
-            train_loader, model, optimizer, scheduler, args
-        )
-
-        ### VALID
-        auc, acc = validate(valid_loader, model, args)
-
-        ### TODO: model save or early stopping
-        wandb.log(
-            {
-                "epoch": epoch,
-                "train_loss_epoch": train_loss,
-                "train_auc_epoch": train_auc,
-                "train_acc_epoch": train_acc,
-                "valid_auc_epoch": auc,
-                "valid_acc_epoch": acc,
-            }
-        )
-        if auc > best_auc:
-            best_auc = auc
-            # torch.nn.DataParallel로 감싸진 경우 원래의 model을 가져옵니다.
-            model_to_save = model.module if hasattr(model, "module") else model
-            save_checkpoint(
-                {
-                    "epoch": epoch + 1,
-                    "state_dict": model_to_save.state_dict(),
-                },
-                args.model_dir,
-                "model.pt",
-            )
-            early_stopping_counter = 0
-        else:
-            early_stopping_counter += 1
-            if early_stopping_counter >= args.patience:
-                print(
-                    f"EarlyStopping counter: {early_stopping_counter} out of {args.patience}"
-                )
-                break
-
-        # scheduler
-        if args.scheduler == "plateau":
-            scheduler.step(best_auc)
             
             
 def run_with_vaild_loss(args, train_data, valid_data, model):

@@ -1,6 +1,7 @@
 {
     "name": "lgcnLSTMattn",
     "n_gpu": 1,
+    "seed": 42,
 
     "arch": {
         "type": "lgcnLSTMattn",
@@ -19,7 +20,8 @@
             "batch_size": 512,
             "shuffle": true,
             "num_workers": 2,
-            "validation_split": 0.2
+            "validation_split": 0.2,
+            "asset_dir": "/opt/ml/level2_dkt-recsys-09/DKT/asset"
         }
     },
     "optimizer": {
@@ -43,6 +45,7 @@
         }
     },
     "model": {
+        "name": "geslstmattn",
         "max_seq_len": 200,
         "hidden_dim": 256,
         "n_layers": 2,

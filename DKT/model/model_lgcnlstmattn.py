@@ -15,34 +15,34 @@ torch.cuda.empty_cache()
 
 
 class GESLSTMATTN(nn.Module):
-    def __init__(self, args, adj_matrix):
+    def __init__(self, adj_matrix, **args):
         super(GESLSTMATTN, self).__init__()
         self.args = args
+        self.device = self.args.device
         
         # Set Parameter
         self.CONTISIZE = 6
-        self.hidden_dim = self.args.hidden_dim
-        self.n_layers = self.args.n_layers
-        self.n_heads = self.args.n_heads
-        self.drop_out = self.args.drop_out
+        self.hidden_dim = self.args['hidden_dim']
+        self.n_layers = self.args['n_layers']
+        self.n_heads = self.args['n_heads']
+        self.drop_out = self.args['drop_out']
 
         # Embedding
         # interaction은 현재 correct로 구성되어있다. correct(1, 2) + padding(0)
         self.embedding_interaction = nn.Embedding(3, self.hidden_dim // 3)
-        self.embedding_test = nn.Embedding(self.args.n_test + 1, self.hidden_dim // 3)
-        self.embedding_tag = nn.Embedding(self.args.n_tag + 1, self.hidden_dim // 3)
-        
+        self.embedding_test = nn.Embedding(self.args['n_test'] + 1, self.hidden_dim // 3)
+        self.embedding_tag = nn.Embedding(self.args['n_tag'] + 1, self.hidden_dim // 3)
         
         # =============== GCN embedding, embedding_question===================================================
-        self.indices = torch.tensor(adj_matrix[0]).type(torch.int64).to(self.args.device)
-        self.values = torch.tensor(adj_matrix[1]).to(self.args.device)
+        self.indices = torch.tensor(adj_matrix[0]).type(torch.int64).to(self.device)
+        self.values = torch.tensor(adj_matrix[1]).to(self.args['device'])
         self.shape = adj_matrix[2]
         self.SparseL = torch.sparse.FloatTensor(self.indices, self.values, self.shape)
         
-        self.gcn_n_item = int(self.args.gcn_n_items)
-        self.gcn_n_layes = int(self.args.gcn_n_layes)
+        self.gcn_n_item = int(self.args['gcn_n_items'])
+        self.gcn_n_layes = int(self.args['gcn_n_layes'])
         
-        self.gcn_embedding = nn.Embedding(self.gcn_n_item, self.hidden_dim // 3).to(self.args.device)
+        self.gcn_embedding = nn.Embedding(self.gcn_n_item, self.hidden_dim // 3).to(self.device)
         self.out = self.get_GES_embedding()
         
         self.embedding_question = nn.Parameter(self.out)

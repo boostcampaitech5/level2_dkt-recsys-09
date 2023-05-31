@@ -73,7 +73,7 @@ def __make_user_item_interaction(config, train_df, test_df):
 
     print('preprocessed data save')
     
-    data_dir = config['data_loader']['data_dir']
+    data_dir = config['data_loader']['args']['data_dir']
     np.save(os.path.join(data_dir, 'preprocessed_data'), np.array([train_dict, max(users) + 1, max(items) + 1]))
     tag_df_sorted = all_df.sort_values(by=['KnowledgeTag_new', 'iid_new'])
     grouped_tag = tag_df_sorted.groupby('KnowledgeTag_new').apply(lambda r: list(set(r['iid_new'].values)))
