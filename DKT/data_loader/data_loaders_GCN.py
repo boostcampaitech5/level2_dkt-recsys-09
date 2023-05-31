@@ -87,7 +87,7 @@ class HMDataLoader(BaseDataLoader):
         self.data = self.preprocess.data_augmentation(self.data)
         self.dataset = HMDataset(self.data, args['max_seq_len']) 
         
-        super().__init__(self.dataset, args['batch_size'], args['shuffle'], args['validation_split'], args['num_workers'], collate_fn=self.collate)
+        super().__init__(self.dataset, args['batch_size'], args['shuffle'], args['validation_split'], args['num_workers'], collate_fn=self.collate, fold=0)
 
     def collate(self, batch):
         col_n = len(batch[0])
