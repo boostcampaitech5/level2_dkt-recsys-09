@@ -18,7 +18,7 @@ import collections
 import os
 
 def main(args):
-    #wandb.login()
+    wandb.login()
 
     setSeeds(args['seed'])
     args['model']['device'] = "cuda" if torch.cuda.is_available() else "cpu"
