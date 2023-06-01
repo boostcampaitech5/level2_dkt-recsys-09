@@ -10,12 +10,11 @@ from torch.optim import Adam, AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from transformers import get_linear_schedule_with_warmup
 
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from data_loader import get_loaders
+from data_loader.data_preprocess_LQ import get_loaders
 
 
 
-from model import LSTM, LSTMATTN, Bert, LastQuery
+from model.model_LQ import LSTM, LSTMATTN, Bert, LastQuery
 
 def get_optimizer(model, args):
     if args.optimizer == "adam":
