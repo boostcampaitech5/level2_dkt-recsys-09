@@ -15,7 +15,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 class Preprocess:
-    def __init__(self, **args):
+    def __init__(self, args):
         self.args = args
         self.train_data = None
         self.test_data = None
@@ -42,15 +42,15 @@ class Preprocess:
         return data_1, data_2
 
     def __save_labels(self, encoder, name):
-        le_path = os.path.join(self.args['asset_dir'], name + "_classes.npy")
+        le_path = os.path.join(self.args['data_loader']['args']['asset_dir'], name + "_classes.npy")
         np.save(le_path, encoder.classes_)
 
     def __preprocessing(self, df, is_train=True):
         cate_cols = ["assessmentItemID", "testId", "KnowledgeTag"]
         
 
-        if not os.path.exists(self.args['asset_dir']):
-            os.makedirs(self.args['asset_dir'])
+        if not os.path.exists(self.args['data_loader']['args']['asset_dir']):
+            os.makedirs(self.args['data_loader']['args']['asset_dir'])
         
         
         for col in cate_cols:
@@ -62,7 +62,7 @@ class Preprocess:
                 le.fit(a)
                 self.__save_labels(le, col)
             else:
-                label_path = os.path.join(self.args['asset_dir'], col + "_classes.npy")
+                label_path = os.path.join(self.args['data_loader']['args']['asset_dir'], col + "_classes.npy")
                 le.classes_ = np.load(label_path)
 
                 df[col] = df[col].apply(
@@ -97,21 +97,20 @@ class Preprocess:
         return df
 
     def load_data_from_file(self, file_name, is_train=True):
-        csv_file_path = os.path.join(self.args['data_dir'], file_name)
+        csv_file_path = os.path.join(self.args['data_loader']['args']['data_dir'], file_name)
         df = pd.read_csv(csv_file_path, parse_dates=['Timestamp'])  # , nrows=100000)
         df = self.__feature_engineering(df, is_train)
         df = self.__preprocessing(df, is_train)
 
         # 추후 feature를 embedding할 시에 embedding_layer의 input 크기를 결정할때 사용
-
-        self.args['n_questions'] = len(
-            np.load(os.path.join(self.args['asset_dir'], "assessmentItemID_classes.npy"))
+        self.args['model']['n_questions'] = len(
+            np.load(os.path.join(self.args['data_loader']['args']['asset_dir'], "assessmentItemID_classes.npy"))
         )
-        self.args['n_test'] = len(
-            np.load(os.path.join(self.args['asset_dir'], "testId_classes.npy"))
+        self.args['model']['n_test'] = len(
+            np.load(os.path.join(self.args['data_loader']['args']['asset_dir'], "testId_classes.npy"))
         )
-        self.args['n_tag'] = len(
-            np.load(os.path.join(self.args['asset_dir'], "KnowledgeTag_classes.npy"))
+        self.args['model']['n_tag'] = len(
+            np.load(os.path.join(self.args['data_loader']['args']['asset_dir'], "KnowledgeTag_classes.npy"))
         )
 
         df = df.sort_values(by=["userID", "Timestamp"], axis=0)

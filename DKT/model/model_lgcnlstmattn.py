@@ -13,12 +13,17 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 gc.collect()
 torch.cuda.empty_cache()
 
+try:
+    from transformers.modeling_bert import BertConfig, BertEncoder, BertModel    
+except:
+    from transformers.models.bert.modeling_bert import BertConfig, BertEncoder, BertModel
+
 
 class GESLSTMATTN(nn.Module):
     def __init__(self, adj_matrix, **args):
         super(GESLSTMATTN, self).__init__()
         self.args = args
-        self.device = self.args.device
+        self.device = self.args['device']
         
         # Set Parameter
         self.CONTISIZE = 6
@@ -141,7 +146,7 @@ class GESLSTMATTN(nn.Module):
             out = out + x
         out = out / (self.gcn_n_layes + 1)
         
-        padding = torch.tensor([[0] * (self.hidden_dim // 3)]).to(self.args.device)
+        padding = torch.tensor([[0] * (self.hidden_dim // 3)]).to(self.device)
         out = torch.cat((padding, out))
         
         return out
@@ -159,7 +164,7 @@ class GESLSTMATTN(nn.Module):
         out = torch.stack(embeddings_list, dim=1)
         out = torch.mean(out, dim=1)
         
-        padding = torch.tensor([[0] * (self.hidden_dim // 3)]).to(self.args.device)
+        padding = torch.tensor([[0] * (self.hidden_dim // 3)]).to(self.device)
         out = torch.cat((padding, out))
         return out
     # ========================================================================================

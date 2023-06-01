@@ -18,10 +18,10 @@ import collections
 import os
 
 def main(args):
-    wandb.login()
+    #wandb.login()
 
     setSeeds(args['seed'])
-    args.device = "cuda" if torch.cuda.is_available() else "cpu"
+    args['model']['device'] = "cuda" if torch.cuda.is_available() else "cpu"
     
     if not os.path.exists('/opt/ml/input/data/preprocessed_data.npy'):
         train_df = pd.read_csv("/opt/ml/input/data/train_data.csv")
@@ -32,7 +32,7 @@ def main(args):
     rel_dict = np.load('/opt/ml/input/data/preprocessed_data_rel.npy', allow_pickle=True)[0]    
     
     print('num_user:%d, num_item:%d' % (num_user, num_item))
-    args.gcn_n_items = num_item
+    args['model']['gcn_n_items'] = num_item
     
     train_dict_len = [len(train_dict[u]) for u in train_dict]
     print('max len: %d, min len:%d, avg len:%.2f' % (np.max(train_dict_len), np.min(train_dict_len), np.mean(train_dict_len)))
@@ -42,7 +42,7 @@ def main(args):
     adj_matrix = get_adj_matrix(train_dict, rel_dict, num_item, model_params['alpha'], model_params['beta'], model_params['max_seq_len'])
     print('Model preparing...')
     
-    preprocess = Preprocess(**args['data_loader']['args'])
+    preprocess = Preprocess(args)
     preprocess.load_train_data('train_data.csv')
     train_data = preprocess.get_train_data()
 
@@ -65,13 +65,14 @@ def main(args):
         name += f'{key}_{value}, '
         
     wandb.init(project="LGCNtrans", config=vars(args), name=name, entity="ffm")
-    model = trainer_lgcnlstmattn.get_model(adj_matrix, **model_params).to(args.device)
+    
+    model = trainer_lgcnlstmattn.get_model(adj_matrix, **model_params).to(args['model']['device'])
     trainer_lgcnlstmattn.run_with_vaild_loss(args, train_data, valid_data, model)
 
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default=None, type=str,
+    args.add_argument('-c', '--config', default="./config/config_lgcnlstmattn.json", type=str,
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')

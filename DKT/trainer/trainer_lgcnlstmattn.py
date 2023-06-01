@@ -23,20 +23,20 @@ def get_model(adj_matrix, **args):
             
             
 def run_with_vaild_loss(args, train_data, valid_data, model):
-    train_loader, valid_loader = get_GES_loaders(args, train_data, valid_data)
-
+    train_loader, valid_loader = get_GES_loaders(args['data_loader']['args'], train_data, valid_data)
+    
     # only when using warmup scheduler
-    args.total_steps = int(math.ceil(len(train_loader.dataset) / args.batch_size)) * (
-        args.n_epochs
+    args['scheduler']['total_steps'] = int(math.ceil(len(train_loader.dataset) / args['trainer']['batch_size'])) * (
+        args['trainer']['n_epochs']
     )
-    args.warmup_steps = args.total_steps // 10
+    args['scheduler']['warmup_steps'] = args['scheduler']['total_steps'] // 10
 
-    optimizer = get_optimizer(model, args)
-    scheduler = get_scheduler(optimizer, args)
+    optimizer = get_optimizer(model, **args['optimizer'])
+    scheduler = get_scheduler(optimizer, **args['scheduler'])
 
     best_auc = -1
     early_stopping_counter = 0
-    for epoch in range(args.n_epochs):
+    for epoch in range(args['trainer']['n_epochs']):
 
         print(f"Start Training: Epoch {epoch + 1}")
 
@@ -68,20 +68,20 @@ def run_with_vaild_loss(args, train_data, valid_data, model):
                     "epoch": epoch + 1,
                     "state_dict": model_to_save.state_dict(),
                 },
-                args.model_dir,
-                "model.pt",
+                os.path.join(args['trainer']['save_dir'], args['name']),
+                "model.pt"
             )
             early_stopping_counter = 0
         else:
             early_stopping_counter += 1
-            if early_stopping_counter >= args.patience:
+            if early_stopping_counter >= args['trainer']['patience']:
                 print(
-                    f"EarlyStopping counter: {early_stopping_counter} out of {args.patience}"
+                    f"EarlyStopping counter: {early_stopping_counter} out of {args['patience']}"
                 )
                 break
 
         # scheduler
-        if args.scheduler == "plateau":
+        if args['scheduler']['name'] == "plateau":
             scheduler.step(best_auc)
 
 
@@ -92,14 +92,14 @@ def train(train_loader, model, optimizer, scheduler, args):
     total_targets = []
     losses = []
     for step, batch in enumerate(train_loader):
-        input = list(map(lambda t: t.to(args.device), process_batch(batch)))
+        input = list(map(lambda t: t.to(args['model']['device']), process_batch(batch)))
         preds = model(input)
         targets = input[3]  # correct
 
         loss = compute_loss(preds, targets)
         update_params(loss, model, optimizer, scheduler, args)
 
-        if step % args.log_steps == 0:
+        if step % args['trainer']['log_step'] == 0:
             print(f"Training steps: {step} Loss: {str(loss.item())}")
 
         # predictions
@@ -127,7 +127,7 @@ def validate(valid_loader, model, args):
     total_targets = []
     losses = []
     for step, batch in enumerate(valid_loader):
-        input = list(map(lambda t: t.to(args.device), process_batch(batch)))
+        input = list(map(lambda t: t.to(args['model']['device']), process_batch(batch)))
 
         preds = model(input)
         targets = input[3]  # correct
@@ -159,7 +159,7 @@ def validate_with_loss(valid_loader, model, args):
     total_preds = []
     total_targets = []
     for step, batch in enumerate(valid_loader):
-        input = list(map(lambda t: t.to(args.device), process_batch(batch)))
+        input = list(map(lambda t: t.to(args['model']['device']), process_batch(batch)))
 
         preds = model(input)
         targets = input[3]  # correct
@@ -185,12 +185,12 @@ def validate_with_loss(valid_loader, model, args):
 def inference(args, test_data, model):
 
     model.eval()
-    _, test_loader = get_GES_loaders(args, None, test_data)
+    _, test_loader = get_GES_loaders(args['data_loader']['args'], None, test_data)
 
     total_preds = []
 
     for step, batch in enumerate(test_loader):
-        input = list(map(lambda t: t.to(args.device), process_batch(batch)))
+        input = list(map(lambda t: t.to(args['model']['device']), process_batch(batch)))
 
         preds = model(input)
 
@@ -201,17 +201,14 @@ def inference(args, test_data, model):
         total_preds += list(preds)
 
     time = datetime.now().strftime('%Y%m%d%H%M%S')
-    model_name = args.model
-    write_path = os.path.join(args.output_dir, time + "_" + model_name + ".csv")
-    if not os.path.exists(args.output_dir):
-        os.makedirs(args.output_dir)
+    model_name = args['model']['name']
+    write_path = os.path.join(args['test']['submission_dir'], time + "_" + model_name + ".csv")
+    if not os.path.exists(args['test']['submission_dir']):
+        os.makedirs(args['test']['submission_dir'])
     with open(write_path, "w", encoding="utf8") as w:
         w.write("id,prediction\n")
         for id, p in enumerate(total_preds):
             w.write("{},{}\n".format(id, p))
-
-
-
 
 
 # 배치 전처리
@@ -257,8 +254,8 @@ def compute_loss(preds, targets):
 
 def update_params(loss, model, optimizer, scheduler, args):
     loss.backward()
-    torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad)
-    if args.scheduler == "linear_warmup":
+    torch.nn.utils.clip_grad_norm_(model.parameters(), args['trainer']['clip_grad'])
+    if args['scheduler']['name'] == "linear_warmup":
         scheduler.step()
     optimizer.step()
     optimizer.zero_grad()
@@ -273,10 +270,10 @@ def save_checkpoint(state, model_dir, model_filename):
 
 def load_model(args, adj_matrix):
 
-    model_path = os.path.join(args.model_dir, args.model_name)
+    model_path = args['test']['model_dir']
     print("Loading Model from:", model_path)
     load_state = torch.load(model_path)
-    model = get_model(args, adj_matrix)
+    model = get_model(adj_matrix, **args['model'])
 
     # load model state
     model.load_state_dict(load_state["state_dict"], strict=True)
