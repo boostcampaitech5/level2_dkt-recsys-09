@@ -3,8 +3,10 @@ import collections
 import torch
 import numpy as np
 import sys
+import os
 
-sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+#sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 import model.loss_GCN as module_loss
 import model.metric_GCN as module_metric
@@ -13,7 +15,9 @@ from parse_config import ConfigParser
 from trainer.trainer_HM import Trainer
 from utils import prepare_device
 import wandb
-import os
+
+
+
 
 import data_loader.data_loaders_GCN as module_data
 os.environ['wandb mode'] = 'offline'
@@ -67,7 +71,7 @@ def main(config):
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default=None, type=str,
+    args.add_argument('-c', '--config', default='config/config_HM.json', type=str,
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')

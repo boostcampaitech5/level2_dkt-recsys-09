@@ -1,8 +1,10 @@
 import os
 import torch
 import sys
+import os
 
-sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+#sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 from trainer import trainer_lgcnlstmattn
 from data_loader.dataloader_lgcnlstmattn import Preprocess
@@ -38,7 +40,7 @@ def main(args):
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default="./config/config_lgcnlstmattn.json", type=str,
+    args.add_argument('-c', '--config', default=".onfig/config_lgcnlstmattn.json", type=str,
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
