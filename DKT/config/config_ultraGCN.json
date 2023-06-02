@@ -58,7 +58,7 @@
     },
     "test": {
         "data_dir": "~/input/data/test_data_modify.csv",
-        "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/UltraGCN/0531_115409/model_best",
+        "model_dir": "/opt/ml/input/level2_dkt-recsys-09/DKT/saved/models/UltraGCN/0602_020651/model_best",
         "submission_dir": "./submission/UltraGCN_submission.csv",
         "sample_submission_dir": "~/input/data/sample_submission.csv",
         "batch_size": 512
