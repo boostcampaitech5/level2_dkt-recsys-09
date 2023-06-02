@@ -69,11 +69,11 @@ class Preprocess:
         
         csv = 'train' if is_train else 'test'
             
-        if os.path.exists(f"/opt/ml/input/data/{csv}_featured.csv"):
-            df = pd.read_csv(f"/opt/ml/input/data/{csv}_featured.csv")
+        if os.path.exists(f"/opt/ml/input/data/{csv}_featured2.csv"):
+            df = pd.read_csv(f"/opt/ml/input/data/{csv}_featured2.csv")
         else:
             df = fe(df)
-            df.to_csv(f"/opt/ml/input/data/{csv}_featured.csv")
+            df.to_csv(f"/opt/ml/input/data/{csv}_featured2.csv")
         return df
 
     def load_data_from_file(self, file_name, is_train=True):

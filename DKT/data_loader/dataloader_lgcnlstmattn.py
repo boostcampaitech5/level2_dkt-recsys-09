@@ -9,9 +9,10 @@ import torch
 import tqdm
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import KFold
-from src.feature_engine import fe
+from .feature_engine_lgcnlstmattn import fe
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 class Preprocess:
     def __init__(self, args):
@@ -41,15 +42,15 @@ class Preprocess:
         return data_1, data_2
 
     def __save_labels(self, encoder, name):
-        le_path = os.path.join(self.args.asset_dir, name + "_classes.npy")
+        le_path = os.path.join(self.args['data_loader']['args']['asset_dir'], name + "_classes.npy")
         np.save(le_path, encoder.classes_)
 
     def __preprocessing(self, df, is_train=True):
         cate_cols = ["assessmentItemID", "testId", "KnowledgeTag"]
         
 
-        if not os.path.exists(self.args.asset_dir):
-            os.makedirs(self.args.asset_dir)
+        if not os.path.exists(self.args['data_loader']['args']['asset_dir']):
+            os.makedirs(self.args['data_loader']['args']['asset_dir'])
         
         
         for col in cate_cols:
@@ -61,7 +62,7 @@ class Preprocess:
                 le.fit(a)
                 self.__save_labels(le, col)
             else:
-                label_path = os.path.join(self.args.asset_dir, col + "_classes.npy")
+                label_path = os.path.join(self.args['data_loader']['args']['asset_dir'], col + "_classes.npy")
                 le.classes_ = np.load(label_path)
 
                 df[col] = df[col].apply(
@@ -96,21 +97,20 @@ class Preprocess:
         return df
 
     def load_data_from_file(self, file_name, is_train=True):
-        csv_file_path = os.path.join(self.args.data_dir, file_name)
+        csv_file_path = os.path.join(self.args['data_loader']['args']['data_dir'], file_name)
         df = pd.read_csv(csv_file_path, parse_dates=['Timestamp'])  # , nrows=100000)
         df = self.__feature_engineering(df, is_train)
         df = self.__preprocessing(df, is_train)
 
         # 추후 feature를 embedding할 시에 embedding_layer의 input 크기를 결정할때 사용
-
-        self.args.n_questions = len(
-            np.load(os.path.join(self.args.asset_dir, "assessmentItemID_classes.npy"))
+        self.args['model']['n_questions'] = len(
+            np.load(os.path.join(self.args['data_loader']['args']['asset_dir'], "assessmentItemID_classes.npy"))
         )
-        self.args.n_test = len(
-            np.load(os.path.join(self.args.asset_dir, "testId_classes.npy"))
+        self.args['model']['n_test'] = len(
+            np.load(os.path.join(self.args['data_loader']['args']['asset_dir'], "testId_classes.npy"))
         )
-        self.args.n_tag = len(
-            np.load(os.path.join(self.args.asset_dir, "KnowledgeTag_classes.npy"))
+        self.args['model']['n_tag'] = len(
+            np.load(os.path.join(self.args['data_loader']['args']['asset_dir'], "KnowledgeTag_classes.npy"))
         )
 
         df = df.sort_values(by=["userID", "Timestamp"], axis=0)
@@ -146,43 +146,6 @@ class Preprocess:
     def load_test_data(self, file_name):
         self.test_data = self.load_data_from_file(file_name, is_train=False)
 
-
-class DKTDataset(torch.utils.data.Dataset):
-    def __init__(self, data, args):
-        self.data = data
-        self.args = args
-
-    def __getitem__(self, index):
-        row = self.data[index]
-
-        # 각 data의 sequence length
-        seq_len = len(row[0])
-
-        test, question, tag, correct = row[0], row[1], row[2], row[3]
-
-        cate_cols = [test, question, tag, correct]
-
-        # max seq len을 고려하여서 이보다 길면 자르고 아닐 경우 그대로 냅둔다
-        if seq_len > self.args.max_seq_len:
-            for i, col in enumerate(cate_cols):
-                cate_cols[i] = col[-self.args.max_seq_len :]
-            mask = np.ones(self.args.max_seq_len, dtype=np.int16)
-        else:
-            mask = np.zeros(self.args.max_seq_len, dtype=np.int16)
-            mask[-seq_len:] = 1
-
-        # mask도 columns 목록에 포함시킴
-        cate_cols.append(mask)
-
-        # np.array -> torch.tensor 형변환
-        for i, col in enumerate(cate_cols):
-            cate_cols[i] = torch.tensor(col)
-
-        return cate_cols
-
-    def __len__(self):
-        return len(self.data)
-    
     
     
 class GESDataset(torch.utils.data.Dataset):
@@ -208,12 +171,12 @@ class GESDataset(torch.utils.data.Dataset):
         total_cols = cate_cols + cont_columns
 
         # max seq len을 고려하여서 이보다 길면 자르고 아닐 경우 그대로 냅둔다
-        if seq_len > self.args.max_seq_len:
+        if seq_len > self.args['max_seq_len']:
             for i, col in enumerate(total_cols):
-                total_cols[i] = col[-self.args.max_seq_len :]
-            mask = np.ones(self.args.max_seq_len, dtype=np.int16)
+                total_cols[i] = col[-self.args['max_seq_len'] :]
+            mask = np.ones(self.args['max_seq_len'], dtype=np.int16)
         else:
-            mask = np.zeros(self.args.max_seq_len, dtype=np.int16)
+            mask = np.zeros(self.args['max_seq_len'], dtype=np.int16)
             mask[-seq_len:] = 1
 
         # mask도 columns 목록에 포함시킴
@@ -250,34 +213,6 @@ def collate(batch):
     return tuple(col_list)
 
 
-def get_loaders(args, train, valid):
-
-    pin_memory = False
-    train_loader, valid_loader = None, None
-
-    if train is not None:
-        trainset = DKTDataset(train, args)
-        train_loader = torch.utils.data.DataLoader(
-            trainset,
-            num_workers=args.num_workers,
-            shuffle=True,
-            batch_size=args.batch_size,
-            pin_memory=pin_memory,
-            collate_fn=collate,
-        )
-    if valid is not None:
-        valset = DKTDataset(valid, args)
-        valid_loader = torch.utils.data.DataLoader(
-            valset,
-            num_workers=args.num_workers,
-            shuffle=False,
-            batch_size=args.batch_size,
-            pin_memory=pin_memory,
-            collate_fn=collate,
-        )
-
-    return train_loader, valid_loader
-
 def get_GES_loaders(args, train, valid):
 
     pin_memory = False
@@ -287,9 +222,9 @@ def get_GES_loaders(args, train, valid):
         trainset = GESDataset(train, args)
         train_loader = torch.utils.data.DataLoader(
             trainset,
-            num_workers=args.num_workers,
+            num_workers=args['num_workers'],
             shuffle=True,
-            batch_size=args.batch_size,
+            batch_size=args['batch_size'],
             pin_memory=pin_memory,
             collate_fn=collate,
         )
@@ -297,9 +232,9 @@ def get_GES_loaders(args, train, valid):
         valset = GESDataset(valid, args)
         valid_loader = torch.utils.data.DataLoader(
             valset,
-            num_workers=args.num_workers,
+            num_workers=args['num_workers'],
             shuffle=False,
-            batch_size=args.batch_size,
+            batch_size=args['batch_size'],
             pin_memory=pin_memory,
             collate_fn=collate,
         )

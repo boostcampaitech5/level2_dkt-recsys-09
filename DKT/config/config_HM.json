@@ -1,6 +1,7 @@
 {
     "name": "HybridModel",
     "n_gpu": 1,
+    "fold": false,
 
     "arch": {
         "type": "HMModel_lstm",
@@ -13,7 +14,7 @@
             "n_layers": 3,
             "n_heads": 4,
             "drop_out": 0.4,
-            "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/UltraGCN/0524_043901/model_best.pth",
+            "model_dir": "/opt/ml/input/level2_dkt-recsys-09/DKT/saved/models/UltraGCN/0602_020651/model_best0.pth",
             "ultragcn": {
                 "user_num": 7442,
                 "item_num": 9454,
@@ -71,7 +72,7 @@
     },
     "test": {
         "data_dir": "~/input/data/test_data_modify.csv",
-        "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/models/HybridModel/0524_162035/model_best.pth",
+        "model_dir": "/opt/ml/input/level2_dkt-recsys-09/DKT/saved/models/HybridModel/0531_121848/model_best0.pth",
         "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/UltraGCN_HM_aug_lstm.csv",
         "sample_submission_dir": "~/input/data/sample_submission.csv",
         "batch_size": 128

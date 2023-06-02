@@ -1,4 +1,3 @@
-from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Dataset
 from base import BaseDataLoader
 import pandas as pd
@@ -7,21 +6,6 @@ from .data_preprocess_GCN import ultragcn_preprocess
 from .data_preprocess_HM import Preprocess
 import torch
 import numpy as np
-
-
-class MnistDataLoader(BaseDataLoader):
-    """
-    MNIST data loading demo using BaseDataLoader
-    """
-    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
-        trsfm = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])
-        self.data_dir = data_dir
-        self.dataset = datasets.MNIST(self.data_dir, train=training, download=True, transform=trsfm)
-        super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
-
 
 class UltraGCNDataset(Dataset):
     def __init__(self, data_dir):
@@ -103,7 +87,7 @@ class HMDataLoader(BaseDataLoader):
         self.data = self.preprocess.data_augmentation(self.data)
         self.dataset = HMDataset(self.data, args['max_seq_len']) 
         
-        super().__init__(self.dataset, args['batch_size'], args['shuffle'], args['validation_split'], args['num_workers'], collate_fn=self.collate)
+        super().__init__(self.dataset, args['batch_size'], args['shuffle'], args['validation_split'], args['num_workers'], collate_fn=self.collate, fold=0)
 
     def collate(self, batch):
         col_n = len(batch[0])

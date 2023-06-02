@@ -1,17 +1,8 @@
 {
     "name": "lgcnLSTMattn",
     "n_gpu": 1,
+    "seed": 42,
 
-    "arch": {
-        "type": "lgcnLSTMattn",
-        "args": {
-            "user_num": 7442,
-            "item_num": 9454,
-            "embedding_dim": 64,
-            "gamma": 1e-4,
-            "lambda": 0.8
-        }
-    },
     "data_loader": {
         "type": "lgcnLSTMattnDataLoader",
         "args":{
@@ -19,30 +10,33 @@
             "batch_size": 512,
             "shuffle": true,
             "num_workers": 2,
-            "validation_split": 0.2
+            "validation_split": 0.2,
+            "asset_dir": "/opt/ml/level2_dkt-recsys-09/DKT/asset",
+            "max_seq_len": 200
         }
     },
+
     "optimizer": {
-        "type": "Adam",
-        "args":{
-            "lr": 0.001,
-            "weight_decay": 0,
-            "amsgrad": true
-        }
+        "name": "adam",
+        "lr": 0.001,
+        "weight_decay": 0.01,
+        "amsgrad": true
     },
+
     "loss": "lgcnLSTMattn_loss",
     "metrics": [
         "accuracy",
         "auc"
     ],
-    "lr_scheduler": {
-        "type": "StepLR",
-        "args": {
-            "step_size": 50,
-            "gamma": 0.1
-        }
+    
+    "scheduler": {
+        "name": "plateau",
+        "warmup_steps": 0,
+        "total_steps": 0
     },
+
     "model": {
+        "name": "geslstmattn",
         "max_seq_len": 200,
         "hidden_dim": 256,
         "n_layers": 2,
@@ -50,8 +44,14 @@
         "drop_out": 0.4,
         "gcn_n_layes": 2,
         "alpha": 1.0,
-        "beta": 1.0
+        "beta": 1.0,
+        "n_questions": 0,
+        "n_test": 0,
+        "n_tag": 0,
+        "gcn_n_items": 0,
+        "device": "cuda"
     },
+
     "trainer": {
         "n_epochs": 60,
         "batch_size": 70,
@@ -65,15 +65,12 @@
         "verbosity": 2,
         
         "monitor": "min val_loss",
-        "early_stop": 10,
-
-        "tensorboard": false
+        "early_stop": 10
     },
+
     "test": {
-        "data_dir": "~/input/data/test_data_modify.csv",
-        "model_dir": "./saved/models/LGCNtrans/0518_033541/model_best.pth",
-        "submission_dir": "~/level2_dkt-recsys-09/DKT/submission/lgcnLSTMattn_submission.csv",
-        "sample_submission_dir": "~/input/data/sample_submission.csv",
+        "model_dir": "/opt/ml/level2_dkt-recsys-09/DKT/saved/lgcnLSTMattn/model.pt",
+        "submission_dir": "/opt/ml/level2_dkt-recsys-09/DKT/submission/",
         "batch_size": 512
     }
 }

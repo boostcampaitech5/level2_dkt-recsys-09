@@ -17,61 +17,17 @@ def fe(df):
 
     ## col_name를 기준으로 mean, std, sum을 추가하는 함수.
     def new_feature_answer(df, col_name:str, new_feature_name:str):
-
-        grouped_df = df.groupby(col_name)
         
-        mean_series = grouped_df.mean()['answerCode']
-        std_series = grouped_df.std()['answerCode']
-        sum_series = grouped_df.sum()['answerCode']
-        
-        
-        series2mean = dict()
-        for i, v in zip(mean_series.keys(), mean_series.values):
-            series2mean[i] = v
+        mean_series = df.groupby(col_name).agg({'answerCode':'mean'}).to_dict()['answerCode']
+        std_series = df.groupby(col_name).agg({'answerCode':'std'}).to_dict()['answerCode']
+        sum_series = df.groupby(col_name).agg({'answerCode':'sum'}).to_dict()['answerCode']
             
-        series2std = dict()
-        for i, v in zip(std_series.keys(), std_series.values):
-            series2std[i] = v
-            
-        series2sum = dict()
-        for i, v in zip(sum_series.keys(), sum_series.values):
-            series2sum[i] = v
-            
-        df[f'{new_feature_name}_ans_mean'] = df[col_name].map(series2mean)
-        df[f'{new_feature_name}_ans_std'] = df[col_name].map(series2std)
-        df[f'{new_feature_name}_ans_sum'] = df[col_name].map(series2sum)
+        df[f'{new_feature_name}_ans_mean'] = df[col_name].map(mean_series)
+        df[f'{new_feature_name}_ans_std'] = df[col_name].map(std_series)
+        df[f'{new_feature_name}_ans_sum'] = df[col_name].map(sum_series)
         
         return df
 
-
-    ## col_name를 기준으로 mean, std, sum을 추가하는 함수.
-    def new_feature_answer(df, col_name:str, new_feature_name:str): 
-
-        grouped_df = df.groupby(col_name)
-        
-        mean_series = grouped_df.mean()['answerCode']
-        std_series = grouped_df.std()['answerCode']
-        sum_series = grouped_df.sum()['answerCode']
-        
-        
-        series2mean = dict()
-        for i, v in zip(mean_series.keys(), mean_series.values):
-            series2mean[i] = v
-            
-        series2std = dict()
-        for i, v in zip(std_series.keys(), std_series.values):
-            series2std[i] = v
-            
-        series2sum = dict()
-        for i, v in zip(sum_series.keys(), sum_series.values):
-            series2sum[i] = v
-            
-        df[f'{new_feature_name}_ans_mean'] = df[col_name].map(series2mean)
-        df[f'{new_feature_name}_ans_std'] = df[col_name].map(series2std)
-        df[f'{new_feature_name}_ans_sum'] = df[col_name].map(series2sum)
-        
-        return df
-        
         
     # 난이도 설정을 위한 ELO 사용
     def get_ELO_function(df):
@@ -225,21 +181,6 @@ def fe(df):
     df = new_feature_answer(df, 'assessmentItemID', 'assess')
     
     df['recent3_elap_time'] = df.groupby(['userID'])['elap_time'].rolling(3).mean().fillna(0).values
-    
-    
-    # time_df = df[["userID", "prefix", "Timestamp"]].sort_values(by=["userID", "prefix", "Timestamp"])
-    # time_df["first"] = time_df[["userID_reset", "prefix_reset"]].any(axis=1).apply(lambda x: 1 - int(x))
-    # time_df["reset_time"] = time_df["Timestamp"].diff().fillna(pd.Timedelta(seconds=0))
-    # time_df["reset_time"] = (
-    #     time_df["reset_time"].apply(lambda x: x.total_seconds()) * time_df["first"]
-    # )
-    # df["reset_time"] = time_df["reset_time"]#.apply(lambda x: math.log(x + 1))
-    
-    # time_df["reset_time"] = time_df["Timestamp"].diff().fillna(pd.Timedelta(seconds=0))
-    # time_df["reset_time"] = (
-    #     time_df["reset_time"].apply(lambda x: x.total_seconds()) * time_df["first"]
-    # )
-    # df["reset_time"] = time_df["reset_time"]#.apply(lambda x: math.log(x + 1))
     
     return df
     

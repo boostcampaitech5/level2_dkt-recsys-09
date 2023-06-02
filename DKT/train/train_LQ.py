@@ -1,7 +1,12 @@
 import os
-
 import torch
 import wandb
+import sys
+import os
+
+#sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from args_LQ import parse_args
 from trainer import trainer_LQ
 from data_loader.data_preprocess_LQ import Preprocess

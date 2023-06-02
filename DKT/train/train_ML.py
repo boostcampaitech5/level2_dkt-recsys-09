@@ -4,8 +4,12 @@ import torch
 import wandb
 import lightgbm as lgb
 from matplotlib import pyplot as plt
+import sys
+import os
 
-from args import parse_args_train
+#sys.path.append('/opt/ml/level2_dkt-recsys-09/DKT')
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from data_loader.preprocess_ML import load_data, feature_engineering, custom_train_test_split, categorical_label_encoding, convert_time
 from trainer.trainer_ML import train_model
 from utils import read_json, set_seed
