@@ -28,11 +28,16 @@ RecSys 09조 FFM
  ┃ ┣ 📂data_loader  
  ┃ ┣ 📂logger    
  ┃ ┣ 📂model  
- ┃ ┣ 📂src   
+ ┃ ┣ 📂train 
+ ┃ ┣ 📂test
  ┃ ┣ 📂trainer  
  ┃ ┣ 📂utils  
- ┃ ┣ 📜.gitignore  
- ┃ ┣ 📜requirements.txt  
+ ┃ ┣ 📜.gitignore
+ ┃ ┣ 📜args_LQ.py 
+ ┃ ┣ 📜parse_config.py
+ ┃ ┣ 📜requirements.txt
+ ┃ ┣ 📜select_test_model.py  
+ ┃ ┣ 📜select_train_model.py
  ┣ 📂eda  
  ┣ 📂experiments  
  ┗ 📜README.md  
