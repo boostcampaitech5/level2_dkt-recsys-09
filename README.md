@@ -1,10 +1,10 @@
-![header](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/3265b386-e149-4ebc-ae98-cff6d00c6281)
+![그림1](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/44551850-8a5a-445f-895d-7860600d87d2)
 
 RecSys 09조 FFM   
 
 ## 팀원 소개
 
-![그림2](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/c084f436-be9b-42cb-8aa8-02bdd4db7e9a)
+![그림2](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/d35b51d9-d093-4c23-9c2b-40674362eba1)
 
 ## 목차
 ### [Project Configuration](#project-configuration-1)
@@ -48,13 +48,13 @@ RecSys 09조 FFM
 
 Deep Knowledge Tracing (DKT)는 딥러닝을 활용해 지식 상태를 추적하는 방법론으로 개인에게 맞춤화 된 교육을 제공하는데 활용된다. 본 프로젝트에서는 Iscream데이터셋에서 주어진 학생들의 문제 풀이 내역을 기반으로 모델을 학습하여 마지막 문제의 정답 여부를 예측하는 것을 목표로 한다.
 
-### 2. 개발 환경
+### 2. 프로젝트 개발 환경
 •	팀 구성: 5인 1팀, 인당 V100 서버를 VS Code와 SSH로 연결하여 사용  
 •	협업 환경: Notion, GitHub, Wandb
 
 
 ## 프로젝트 팀 구성 및 역할
-![화면 캡처](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/01b430a0-47be-4cb6-8f67-2dc590ed83b9)
+![화면 캡처](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/76eb918c-c070-41d2-9479-098655de0f9e)
 
 
 ## 프로젝트 수행 내용 및 결과
@@ -114,11 +114,11 @@ Deep Knowledge Tracing (DKT)는 딥러닝을 활용해 지식 상태를 추적�
 (7) Catboost
 - 일반적으로 범주형 변수는 추가적인 전처리가 필요하지만 범주형 변수를 모델에 입력만 해주면 처리를 모델에서 직접 해줌
 
-![그림3](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/ccf18600-5258-45ec-90a7-c6277b473c32)
+![그림3](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/508fe7a6-7b11-4c10-bd9b-64706c7dbc38)
 
 ### 4. 성능 개선 및 앙상블
 
-![그림6](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/97eb7886-c8e9-452f-9dee-81a677a689ff)
+![그림6](https://github.com/boostcampaitech5/level2_dkt-recsys-09/assets/91173904/1c8ae40c-da91-4a88-88c4-353019aa69e7)
 
 ### 5. 결과
 
